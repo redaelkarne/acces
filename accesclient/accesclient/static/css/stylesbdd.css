@@ -1,0 +1,323 @@
+/* Resetting default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Form styles */
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+/* Table styles */
+table {
+    width: 120%; /* Adjust the width as needed */
+    margin: 1% auto;
+    margin-left: 3%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform: scale(0.78); /* Scales the element to 80% of its original size */
+    transform-origin: top left; /* Keeps the scaling consistent with the top-left corner */
+    
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
+}
+
+th {
+    padding: 8px; /* Removed redundant border and padding */
+}
+
+/* Specific table cell styles */
+td.message {
+    max-width: 400px; /* Set maximum width for the "Message" cells */
+    min-width: 300px; /* Set minimum width for the "Message" cells */
+}
+tr:nth-child(even) {
+    background-color: #b3b0b0; /* Grey background color for even rows */
+}
+
+tr:nth-child(odd) {
+    background-color: #fff; /* White background color for odd rows */
+}
+ tr.first-row {
+    background-color: #c97cc9; /* Light purple background color for the first row in tbody */
+}
+/* Table row hover effect */
+tr:hover {
+    background-color: rgba(124, 77, 77, 0.616);
+}
+
+/* Dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 100px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show dropdown content */
+.show {
+    display: block;
+}
+
+/* Table container for horizontal scrolling */
+.table-container {
+    width: 80%;
+    overflow-x: auto;
+}
+.button-container {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    margin-top: 20px;
+    margin-left: 60px;
+}
+
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.dropbtn:hover, .apply-button:hover {
+    background-color: #45a049;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.dropdown-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.apply-button {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+.Excel-button {
+    background-color: #00ba3e;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    margin-left: 60px;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    position: relative;
+    top: -900px; /* Adjust this value to move it up or down */
+   
+    margin: 0; /* Remove any unnecessary margins */
+    padding: 0; /* Remove any unnecessary padding */
+}
+/* Targeting buttons with the action-button class */
+.action-button {
+    background-color: #4CAF50; /* Green background */
+    border: none; /* Remove border */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding for equal spacing */
+    text-align: center; /* Center text */
+    text-decoration: none; /* No underline */
+    display: inline-block; /* Align buttons inline */
+    font-size: 16px; /* Font size */
+    width: 150px; /* Set a fixed width for all buttons */
+    margin: 4px; /* Margin around buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+/* Hover effects for buttons */
+.action-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Specific button styles (if you want different colors) */
+.action-button:nth-of-type(1) {
+    background-color: #008CBA; /* Blue for 'Demande' */
+}
+
+.action-button:nth-of-type(2) {
+    background-color: #f44336; /* Red for 'Modifier' */
+}
+
+.action-button:nth-of-type(3) {
+    background-color: #e7e7e7; /* Grey for 'Résilier' */
+    color: black; /* Black text for grey button */
+}
+
+.action-button:last-of-type {
+    background-color: #ff00ff; /* Orange for 'Intervenants' */
+}
+
+/* Hover effects for specific buttons */
+.action-button:nth-of-type(1):hover {
+    background-color: #007bb5; /* Darker blue on hover */
+}
+
+.action-button:nth-of-type(2):hover {
+    background-color: #d32f2f; /* Darker red on hover */
+}
+
+.action-button:nth-of-type(3):hover {
+    background-color: #c0c0c0; /* Darker grey on hover */
+}
+
+.action-button:last-of-type:hover {
+    background-color: #830b83; /* Darker orange on hover */
+}
+
+
+/* Pagination items */
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination a,
+.pagination .current {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #007bff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.pagination a:hover,
+.pagination .current {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.pagination .current {
+    font-weight: bold;
+}
+
+.pagination span {
+    display: inline-block;
+    padding: 8px 16px;
+    color: #333;
+}
+/* Styles for the search form */
+.search-form {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center align items vertically */
+    margin: 20px 0; /* Margin around the form */
+    margin-left: 40px;
+}
+
+/* Style for the label */
+.search-label {
+    margin-right: 10px; /* Space between label and input */
+    font-size: 16px; /* Font size for the label */
+    padding-left: 1%;
+}
+
+/* Style for the search input */
+.search-input {
+    padding: 10px; /* Padding inside the input */
+    font-size: 16px; /* Font size */
+    border: 1px solid #ccc; /* Border */
+    border-radius: 4px; /* Rounded corners */
+    margin-right: 10px; /* Space between input and buttons */
+    flex-grow: 0; /* Make input take remaining space */
+}
+
+/* Base styles for buttons */
+.search-button,
+.reset-button {
+    background-color: #4CAF50; /* Green background */
+    border: none; /* Remove border */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding for equal spacing */
+    text-align: center; /* Center text */
+    text-decoration: none; /* No underline */
+    font-size: 16px; /* Font size */
+    margin-left: 10px; /* Space between buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+/* Hover effects for buttons */
+.search-button:hover,
+.reset-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Specific styles for reset button */
+.reset-button {
+    background-color: #f44336; /* Red background for reset */
+}
+
+/* Hover effect for reset button */
+.reset-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+}

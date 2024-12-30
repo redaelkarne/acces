@@ -1,0 +1,254 @@
+{% load my_filters %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        Voici vos bases de données</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesbdd.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <h1>Voici vos bases de données</h1>
+    <form action="{% url 'export_appareils' %}" method="get">
+        <button type="submit" class="Excel-button">Télécharger les données</button>
+    </form>
+    <!-- Dynamic Filter Dropdown -->
+    <div class="button-container">
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn">Filter les colonnes </button>
+            <div id="dropdownMenu" class="dropdown-content">
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <label>
+                            <input type="checkbox" class="filterCheckbox" name="{{ field_name }}" checked> {{ verbose_name }}
+                        </label><br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <button onclick="applyFilters()" class="apply-button">Appliquer le filtre</button>
+    </div>
+    <form method="GET" action="" class="search-form">
+        <label for="search" class="search-label">Rechercher:</label>
+        <input type="text" id="search" name="search" value="{{ search_query }}" class="search-input">
+        <button type="submit" class="search-button">Rechercher</button>
+        <button type="button" class="reset-button" onclick="resetSearch()">Réinitialiser</button>
+    
+        <!-- Include hidden inputs for the selected columns to maintain their state -->
+        {% for column in selected_columns %}
+            <input type="hidden" name="{{ column }}" value="1">
+        {% endfor %}
+    </form>
+    
+    
+    <!-- Display the table -->
+    <table id="messageTable">
+        <thead>
+            <tr class="first-row">
+                <!-- Define table headers with verbose names -->
+                 
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <th class="{{ field_name }}">{{ verbose_name }}</th>
+                    {% endif %}
+                {% endfor %}
+                <th>Actions</th> 
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Populate table body with data -->
+            {% for appareil in page_obj %}
+            <tr>
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <td class="{{ field_name }}" {% if field_name == 'Informations' %} class="Informations" {% endif %}>
+                            {% if field_name == 'Informations' %}
+                                {{ appareil.Informations|default_if_none:"--" }}
+                            {% else %}
+                                {{ appareil|attr:field_name|default_if_none:"--" }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                {% endfor %}
+                <td>
+                    <!-- Use `N_ID` as the primary key for the URL -->
+                    {% if appareil.N_ID %}
+                        <form action="{% url 'create_message' appareil.N_ID %}" method="GET">
+                            {% csrf_token %}
+                            <button type="submit" class="action-button">Demande</button>
+                        </form>
+                        <form action="{% url 'modify_appareil' appareil.N_ID %}" method="GET">
+                            {% csrf_token %}
+                            <button type="submit" class="action-button">Modifier</button>
+                        </form>
+                        <form action="{% url 'set_appareil_perdu' appareil.N_ID %}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir résilier?');">
+                            {% csrf_token %}
+                            <button type="submit" class="action-button">Résilier</button>
+                        </form>
+                        {% if appareil.Client == "MEDITRAX" %}
+    
+                        <form action="{% url 'modify_autres_if_meditrax' appareil.N_ID %}" method="GET">
+                            <button type="submit" class="action-button">Intervenants</button>
+                        </form>
+{% endif %}
+                    {% else %}
+                        <p>No ID available</p>
+                    {% endif %}
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li><a href="?page=1">&laquo; First</a></li>
+            <li><a href="?page={{ page_obj.previous_page_number }}">&#9664; Previous</a></li>
+        {% endif %}
+
+        {% if page_obj.number > 1 %}
+            <li><a href="?page=1">1</a></li>
+            {% if page_obj.number > 2 %}
+                <li><span>...</span></li>
+            {% endif %}
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-5' and num <= page_obj.number|add:'5' %}
+                {% if page_obj.number == num %}
+                    <li class="current">{{ num }}</li>
+                {% else %}
+                    <li><a href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.number < page_obj.paginator.num_pages %}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-1' %}
+                <li><span>...</span></li>
+            {% endif %}
+            <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+            <li><a href="?page={{ page_obj.next_page_number }}">Next &#9654;</a></li>
+        {% endif %}
+    </ul>
+{% endif %}
+
+
+    <script>
+        // JavaScript for dynamic dropdown filter
+        function toggleDropdown() {
+            var dropdownMenu = document.getElementById("dropdownMenu");
+            if (dropdownMenu.style.display === "none" || dropdownMenu.style.display === "") {
+                dropdownMenu.style.display = "block";
+            } else {
+                dropdownMenu.style.display = "none";
+            }
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn') && !event.target.matches('.filterCheckbox')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.style.display === "block") {
+                        openDropdown.style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // Get cookie value by name
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name === cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        // Set cookie
+        function setCookie(name, value, days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${date.toUTCString()};path=/`;
+        }
+
+        function applyFilters() {
+            const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
+            const filterSettings = {};
+            filterCheckboxes.forEach(checkbox => {
+                const columnName = checkbox.name;
+                const display = checkbox.checked ? '' : 'none';
+
+                // Store filter settings
+                filterSettings[columnName] = checkbox.checked;
+
+                // Hide/show table headers
+                const headers = document.querySelectorAll(`th.${columnName}`);
+                headers.forEach(header => {
+                    header.style.display = display;
+                });
+
+                // Hide/show table cells
+                const cells = document.querySelectorAll(`td.${columnName}`);
+                cells.forEach(cell => {
+                    cell.style.display = display;
+                });
+            });
+            // Store filter settings in a cookie
+            setCookie('columnFilters', JSON.stringify(filterSettings), 7);
+        }
+
+        // Apply saved filters on page load
+        window.onload = function() {
+            const savedFilters = getCookie('columnFilters');
+            if (savedFilters) {
+                const filterSettings = JSON.parse(savedFilters);
+                const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
+                filterCheckboxes.forEach(checkbox => {
+                    const columnName = checkbox.name;
+                    if (filterSettings[columnName] !== undefined) {
+                        checkbox.checked = filterSettings[columnName];
+                        const display = filterSettings[columnName] ? '' : 'none';
+
+                        // Hide/show table headers
+                        const headers = document.querySelectorAll(`th.${columnName}`);
+                        headers.forEach(header => {
+                            header.style.display = display;
+                        });
+
+                        // Hide/show table cells
+                        const cells = document.querySelectorAll(`td.${columnName}`);
+                        cells.forEach(cell => {
+                            cell.style.display = display;
+                        });
+                    }
+                });
+            }
+        }
+        function resetSearch() {
+            const searchInput = document.getElementById('search');
+            searchInput.value = '';
+            
+            // Remove all selected column hidden inputs
+            const selectedColumns = document.querySelectorAll('input[type="hidden"]');
+            selectedColumns.forEach(input => input.remove());
+    
+            // Submit the form to reset the search
+            searchInput.form.submit();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+{% load my_filters %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messages Ascenseurs</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesmesasc.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <h1>Messages Ascenseurs</h1>
+    
+    <form action="{% url 'export_messages' %}" method="get">
+        <button type="submit" class="Excel-button">Télécharger les données</button>
+    </form>
+
+    {% if entretiens|length > 1 %}
+    <form method="GET" action="">
+        <label for="entretien">Select Entretien:</label>
+        <select name="entretien" id="entretien" onchange="this.form.submit()">
+            <option value="">--Select Entretien--</option>
+            {% for entretien in entretiens %}
+                <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+
+    <!-- Dynamic Filter Dropdown -->
+    <div class="button-container">
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn">Filtrer les colonnes</button>
+            <div id="dropdownMenu" class="dropdown-content">
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <label>
+                            <input type="checkbox" class="filterCheckbox" name="{{ verbose_name }}" checked> {{ verbose_name }}
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <button onclick="applyFilters()" class="apply-button">Appliquer le filtre</button>
+    </div>
+
+    <!-- Display the table -->
+    <table id="messageTable">
+        <thead>
+            <tr class="first-row">
+                <!-- Define table headers with verbose names -->
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <th>{{ verbose_name }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Populate table body with data -->
+            {% for message in messages_list %}
+                <tr class="{% if message.Action and 'RAPPORT OK' not in message.Action %}no-rapport-row{% endif %}">
+                    {% for field_name, verbose_name in custom_column_names.items %}
+                        {% if field_name not in excluded_columns %}
+                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                                {% if field_name == 'Message' %}
+                                    {{ message|attr:"Message"|default:"" }}
+                                {% else %}
+                                    {{ message|get_attribute:field_name|default:"--" }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function toggleDropdown() {
+            var dropdownMenu = document.getElementById("dropdownMenu");
+            dropdownMenu.classList.toggle("show");
+        }
+        
+
+        function applyFilters() {
+            const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
+            const table = document.getElementById('messageTable');
+            const headers = table.querySelectorAll('thead th');
+            const rows = table.querySelectorAll('tbody tr');
+
+            filterCheckboxes.forEach((checkbox, index) => {
+                // Find the index of the column for this checkbox
+                const columnIndex = Array.from(headers).findIndex(header => 
+                    header.textContent.trim() === checkbox.name.trim()
+                );
+
+                if (columnIndex !== -1) {
+                    // Toggle header visibility
+                    headers[columnIndex].style.display = checkbox.checked ? '' : 'none';
+
+                    // Toggle column visibility for all rows
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells[columnIndex]) {
+                            cells[columnIndex].style.display = checkbox.checked ? '' : 'none';
+                        }
+                    });
+                }
+            });
+
+            // Close the dropdown
+            document.getElementById("dropdownMenu").classList.remove("show");
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+            const dropdownMenu = document.getElementById("dropdownMenu");
+            const dropbtn = document.querySelector('.dropbtn');
+
+            if (dropdownMenu && !dropbtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+        
+    </script>
+    <script>
+        // document.addEventListener('DOMContentLoaded', function() {
+            // Select all rows without "OK RAPPORT" in the Action column
+           //  const noRapportRows = document.querySelectorAll('.no-rapport-row');
+            
+            // Function to toggle flashing
+            function toggleFlash() {
+            //     noRapportRows.forEach(row => {
+                //     row.classList.toggle('flash-red');
+              //   });
+          //   }
+            
+           //  // Start flashing every 3 seconds if rows exist
+           //  if (noRapportRows.length > 0) {
+           //      toggleFlash(); // Initial flash
+            //     setInterval(toggleFlash, 8000); // Repeat every 3 seconds
+          //   }
+       //  });
+        </script>
+</body>
+</html>
