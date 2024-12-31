@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Messages</h1>
+    
+    <!-- Date Filter Form -->
+    <form method="GET" class="mb-4">
+        <div class="form-group">
+            <label for="date">filtrer par date:</label>
+            <input type="date" id="date" name="date" class="form-control" value="{{ request.GET.date }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Appliqué</button>
+    </form>
+    
+    {% for message in messages %}
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ message.Nom }}</h5>
+                        <p class="card-text">{{ message.Message }}</p>
+                        <p class="card-text">{{ message.Destinataire}}</p>
+                        <p class="card-text">{{ message.ville}}</p>
+                        <a href="{% url 'message-detail' message.pk %}" class="btn btn-primary">Details</a>
+                    </div>
+                    <div class="card-footer text-muted">
+                        {{ message.Date }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

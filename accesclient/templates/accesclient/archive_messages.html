@@ -1,0 +1,160 @@
+{% load my_filters %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Archive Messages Ascenseurs</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesarch.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <h1>Archive Messages Ascenseurs</h1>
+    <form action="{% url 'archive_messages' %}" method="get">
+        <button type="submit" name="export" value="true" class="Excel-button">Télécharger les données</button>
+    </form>
+    {% if filter_values|length > 1 %}
+    <form method="GET" action="">
+        <label for="filter_value">Select Nature de l'appel:</label>
+        <select name="Nature_de_l_appel" id="filter_value" onchange="this.form.submit()">
+            <option value="">--Select Nature de l'appel--</option>
+            {% for value in filter_values %}
+                <option value="{{ value }}" {% if value == selected_value %}selected{% endif %}>{{ value }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+    
+    <!-- Date Range Filter -->
+    <form method="GET" action="" class="horizontal-form">
+        <label for="start_date">Date de début:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+        
+        <label for="end_date">Date de fin:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+        
+        <button type="submit" class="filter-button">Filter</button>
+    </form>
+    
+    
+    <!-- Dynamic Filter Dropdown -->
+    <div class="button-container">
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn">Filter Columns</button>
+            <div id="dropdownMenu" class="dropdown-content">
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <label>
+                            <input type="checkbox" class="filterCheckbox" name="{{ field_name }}" checked> {{ verbose_name }}
+                        </label><br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <button onclick="applyFilters()" class="apply-button">Apply Filters</button>
+    </div>
+    <div class="table-pagination-container">
+    <!-- Display the table -->
+    <table id="messageTable">
+        <thead>
+            <tr class="first-row">
+                <!-- Define table headers with verbose names -->
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <th>{{ verbose_name }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Populate table body with data -->
+            {% for message in messages_list %}
+                <tr>
+                    {% for field_name, verbose_name in custom_column_names.items %}
+                        {% if field_name not in excluded_columns %}
+                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                                {% if field_name == 'Message' %}
+                                    {{ message.Message }}
+                                {% else %}
+                                    {{ message|attr:field_name }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&start_date={{ start_date }}&end_date={{ end_date }}">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&start_date={{ start_date }}&end_date={{ end_date }}">Last</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+<!-- <div>
+    // <p>Total pages: {{ page_obj.paginator.num_pages }}</p>
+    // <p>Current page: {{ page_obj.number }}</p>
+
+    // </div> -->
+    <script>
+        // JavaScript for dynamic dropdown filter
+        function toggleDropdown() {
+    var dropdownMenu = document.getElementById("dropdownMenu");
+    if (dropdownMenu.style.display === "none" || dropdownMenu.style.display === "") {
+        dropdownMenu.style.display = "block";
+    } else {
+        dropdownMenu.style.display = "none";
+    }
+}
+    
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn') && !event.target.matches('.filterCheckbox')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    
+        function applyFilters() {
+            const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
+            const tableHeaders = document.querySelectorAll('th');
+            const tableCells = document.querySelectorAll('td');
+    
+            filterCheckboxes.forEach(checkbox => {
+                const columnName = checkbox.name;
+                const columnIndex = Array.from(tableHeaders).findIndex(header => header.textContent === columnName);
+    
+                tableHeaders[columnIndex].style.display = checkbox.checked ? 'table-cell' : 'none';
+    
+                tableCells.forEach(cell => {
+                    if (cell.cellIndex === columnIndex) {
+                        cell.style.display = checkbox.checked ? 'table-cell' : 'none';
+                    }
+                });
+            });
+            // Close the dropdown after applying filters
+            document.getElementById("dropdownMenu").classList.remove("show");
+        }
+    </script>
+</body>
+</html>

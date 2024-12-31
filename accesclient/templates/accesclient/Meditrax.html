@@ -1,0 +1,80 @@
+<head>
+    <style>
+        body {
+            
+            background-color: #D9AFD9;
+            background-image: linear-gradient(0deg, #D9AFD9 0%, #97D9E1 100%);
+
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif; /* You can change the font if needed */
+        }
+        form {
+            background-color: #f3e5f5; /* Light purple */
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Style the heading */
+        h2 {
+            font-size: 24px;
+            text-align: center;
+            color: #4a148c; /* Dark purple text */
+            margin-bottom: 20px;
+        }
+        
+        /* Style the label */
+        label {
+            font-size: 18px;
+            color: #4a148c;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        /* Make the textarea large, resizable, and adjustable */
+        textarea {
+            width: 100%;
+            min-height: 750px; /* Ensure enough height by default */
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #4a148c;
+            border-radius: 5px;
+            box-sizing: border-box;
+            resize: both; /* Allow both vertical and horizontal resizing */
+            overflow: auto; /* Ensure scrolling for long content */
+        }
+        
+        /* Style the submit button */
+        button {
+            background-color: #7b1fa2; /* Purple button */
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: #6a1b9a; /* Darker purple on hover */
+        }
+        
+    </style>
+</head>
+<h2>Intervenants pour {{ appareil.Client }}</h2>
+
+<form action="{% url 'modify_autres_if_meditrax' appareil.N_ID %}" method="POST">
+    {% csrf_token %}
+    
+    <!-- Field for modifying Autres -->
+    <label for="id_autres">Intervenants:</label>
+    <textarea id="id_autres" name="Autres_1">{{ form.Autres_1.value|default_if_none:'' }}</textarea>
+    
+    <button type="submit">Enregistrer</button>
+</form>

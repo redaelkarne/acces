@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesmesasc.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    
+    <title>Create Message</title>
+    <style>
+        body {
+            margin-top: 10%;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9; /* Light background color for the whole page */
+            color: #333; /* Dark text color for better readability */
+        }
+
+        h1 {
+            text-align: center;
+            color: #6a0dad; /* Purple color for the heading */
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #6a0dad; /* Purple color for labels */
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form textarea {
+            width: calc(100% - 22px); /* Full width minus padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        form textarea {
+            resize: vertical; /* Allow vertical resizing of textarea */
+        }
+
+        form button {
+            background-color: #6a0dad; /* Purple background color for the button */
+            color: #fff; /* White text color */
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto; /* Center the button horizontally */
+            text-align: center;
+            text-decoration: none;
+        }
+
+        form button:hover {
+            background-color: #5a0b9d; /* Darker purple on hover */
+        }
+    </style>
+
+</head>
+<body>
+    <h1>Creation de message :</h1>
+    <form method="post" onsubmit="handleSubmit()">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,239 @@
+/* Resetting default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+    
+}
+
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Form styles */
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+/* Table styles */
+table {
+    width: 60%; /* Adjust the width as needed */
+    margin: 1% auto;
+    margin-left: 5%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform: scale(0.78); /* Scales the element to 80% of its original size */
+    transform-origin: top left; /* Keeps the scaling consistent with the top-left corner */
+    
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
+}
+
+th {
+    padding: 8px; /* Removed redundant border and padding */
+}
+
+/* Specific table cell styles */
+td.message {
+    max-width: 400px; /* Set maximum width for the "Message" cells */
+    min-width: 300px; /* Set minimum width for the "Message" cells */
+}
+tr:nth-child(even) {
+    background-color: #b3b0b0; /* Grey background color for even rows */
+}
+
+tr:nth-child(odd) {
+    background-color: #fff; /* White background color for odd rows */
+}
+ tr.first-row {
+    background-color: #c97cc9; /* Light purple background color for the first row in tbody */
+}
+/* Table row hover effect */
+tr:hover {
+    background-color: rgba(124, 77, 77, 0.616);
+}
+
+/* Dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 100px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show dropdown content */
+.show {
+    display: block;
+}
+
+/* Table container for horizontal scrolling */
+.table-container {
+    width: 80%;
+    overflow-x: auto;
+}
+.button-container {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    margin-top: 20px;
+    margin-left: 65px;
+}
+
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.dropbtn:hover, .apply-button:hover {
+    background-color: #45a049;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.dropdown-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.apply-button {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+.Excel-button {
+    background-color: #00ba3e;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    margin-left: 60px;
+}
+.pagination {
+    margin-top: -4500px; /* Adjust this value as needed */
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+}
+
+/* Pagination items */
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination a,
+.pagination .current {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #007bff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.pagination a:hover,
+.pagination .current {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.pagination .current {
+    font-weight: bold;
+}
+
+.pagination span {
+    display: inline-block;
+    padding: 8px 16px;
+    color: #333;
+}
+.horizontal-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 60px;
+}
+
+.horizontal-form label {
+    font-size: 14px;
+    color: #333;
+    margin-right: 5px;
+}
+
+.horizontal-form input[type="date"],
+.horizontal-form .filter-button {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.horizontal-form .filter-button {
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.horizontal-form .filter-button:hover {
+    background-color: #e0e0e0;
+}

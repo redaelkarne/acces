@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load my_filters %}
+<link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="mb-3">
+                {% csrf_token %}
+                {{ form.fields.errors }}
+                <div class="form-group">
+                    <label for="{{ form.fields.id_for_label }}">Select Fields:</label>
+                    {{ form.fields }}
+                </div>
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </form>
+
+            {% if form.cleaned_data.fields %}
+                {% for field_name in form.cleaned_data.fields %}
+                    {% if field_name != 'N° ID' %}
+                        <p><strong>{{ field_name }}:</strong> {{ message|get_attribute:field_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% for field_name in fields %}
+                    {% if field_name != 'N° ID' %}
+                        <p><strong>{{ field_name }}:</strong> {{ message|get_attribute:field_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
+            <a href="{% url 'messages-list' %}" class="btn btn-secondary mt-3">Back to list</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+{% endblock %}

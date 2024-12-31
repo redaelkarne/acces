@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: django-app
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      # These environment variables match your local database settings
+      DB_NAME: 'dick'
+      DB_USER: 'root'
+      DB_PASSWORD: '289ga69LY'
+      DB_HOST: '192.168.0.214'  # Special DNS to reach host machine from container
+      DB_PORT: '3366'
+    extra_hosts:
+      # Ensure container can resolve host machine's network
+      - "host.docker.internal:host-gateway"
