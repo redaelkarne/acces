@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Messages Ascenseurs</title>
+    <title>Messages En cours</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/stylesmesasc.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
     
@@ -12,22 +12,24 @@
 <body>
     {% include 'navbar.html' %}
     
-    <h1>Messages Ascenseurs</h1>
+    <h1>Messages en cours</h1>
     
     <form action="{% url 'export_messages' %}" method="get">
         <button type="submit" class="Excel-button">Télécharger les données</button>
     </form>
 
     {% if entretiens|length > 1 %}
-    <form method="GET" action="">
-        <label for="entretien">Select Entretien:</label>
-        <select name="entretien" id="entretien" onchange="this.form.submit()">
-            <option value="">--Select Entretien--</option>
-            {% for entretien in entretiens %}
-                <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
-            {% endfor %}
-        </select>
-    </form>
+    <div class="entretien-selector">
+        <form method="GET" action="" class="entretien-form">
+            <label for="entretien" class="entretien-label">Sélectionner l'entretien:</label>
+            <select name="entretien" id="entretien" class="entretien-select" onchange="this.form.submit()">
+                <option value="">--Sélectionner un entretien--</option>
+                {% for entretien in entretiens %}
+                    <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
     {% endif %}
 
     <!-- Dynamic Filter Dropdown -->

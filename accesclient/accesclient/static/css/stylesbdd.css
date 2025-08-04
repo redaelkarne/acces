@@ -41,7 +41,7 @@ table {
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center;
     white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
 }
 
@@ -114,18 +114,19 @@ tr:hover {
 }
 
 .dropbtn {
-    background-color: #4CAF50;
+    background-color: #800080;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
     margin-right: 10px;
 }
-
 .dropbtn:hover, .apply-button:hover {
-    background-color: #45a049;
+    background-color: #8a4b8a;
 }
+
 
 .dropdown {
     position: relative;
@@ -149,21 +150,23 @@ tr:hover {
 }
 
 .apply-button {
-    background-color: #008CBA;
+    background-color: #be49be;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 .Excel-button {
-    background-color: #00ba3e;
+    background-color: #007bff;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
     margin-left: 60px;
+    border-radius: 5px;
 }
 .pagination {
     display: flex;
@@ -230,7 +233,7 @@ tr:hover {
 }
 
 .action-button:last-of-type:hover {
-    background-color: #830b83; /* Darker orange on hover */
+    background-color: #520752; /* Darker orange on hover */
 }
 
 
@@ -307,17 +310,19 @@ tr:hover {
 }
 
 /* Hover effects for buttons */
-.search-button:hover,
+.search-button:hover{
+    background-color: #5bc795; /* Darker red on hover */
+}
 .reset-button:hover {
-    background-color: #45a049; /* Darker green on hover */
+    background-color: #018749; /* Darker green on hover */
 }
 
 /* Specific styles for reset button */
 .reset-button {
-    background-color: #f44336; /* Red background for reset */
+    background-color: #018749; /* Red background for reset */
 }
 
 /* Hover effect for reset button */
 .reset-button:hover {
-    background-color: #d32f2f; /* Darker red on hover */
+    background-color: #5bc795; /* Darker red on hover */
 }

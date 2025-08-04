@@ -23,7 +23,7 @@ from .views import export_messages_to_excel
 from .views import AppareilView,ArchiveMessagesView
 from .views import create_message ,modify_appareil
 from .views import export_appareils_to_excel
-from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte
+from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte,ManageTechniciansView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -57,4 +57,7 @@ urlpatterns = [
     path('astreintes/', views.view_astreintes, name='view_astreintes'),
     path('astreinte/<int:id_astreinte>/modifier/', views.modify_astreinte, name='modify_astreinte'),
     path('astreinte/delete/<int:id_astreinte>/', views.delete_astreinte, name='delete_astreinte'),
+    path('get-technician-data/<int:technician_id>/', views.get_technician_data, name='get_technician_data'),
+    path('manage-technicians/', views.ManageTechniciansView.as_view(), name='manage_technicians'),
+    
 ]

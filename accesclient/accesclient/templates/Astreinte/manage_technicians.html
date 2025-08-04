@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Techniciens</title>
+    <style>
+        /* Same CSS as before */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        td input {
+            width: 90%;
+            padding: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background-color: #45a049;
+        }
+
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestion des Techniciens</h1>
+    <div id="message"></div>
+    <table>
+        <thead>
+            <tr>
+                <th>Client</th>
+                <th>Nom Technicien</th>
+                <th>Type1</th>
+                <th>Media1</th>
+                <th>Type2</th>
+                <th>Media2</th>
+                <th>Type3</th>
+                <th>Media3</th>
+                <th>Type4</th>
+                <th>Media4</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="technicianTableBody">
+            {% for technician in technicians %}
+            <tr data-id="{{ technician.id_repertoire }}">
+                <td><input type="text" value="{{ technician.client }}"></td>
+                <td><input type="text" value="{{ technician.nom_technicien }}"></td>
+                <td><input type="text" value="{{ technician.type1 }}"></td>
+                <td><input type="text" value="{{ technician.media1 }}"></td>
+                <td><input type="text" value="{{ technician.type2 }}"></td>
+                <td><input type="text" value="{{ technician.media2 }}"></td>
+                <td><input type="text" value="{{ technician.type3 }}"></td>
+                <td><input type="text" value="{{ technician.media3 }}"></td>
+                <td><input type="text" value="{{ technician.type4 }}"></td>
+                <td><input type="text" value="{{ technician.media4 }}"></td>
+                <td>
+                    <button class="btn-save" onclick="saveTechnician({{ technician.id_repertoire }})">Enregistrer</button>
+                    <button class="btn-delete" onclick="deleteTechnician({{ technician.id_repertoire }})">Supprimer</button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr id="addRow">
+                <td>
+                    <input type="text" id="newClient" name="newClient" placeholder="Client" value="{{ user.username }}">
+                </td>
+                <td><input type="text" id="newNomTechnicien" placeholder="Nom Technicien"></td>
+                <td><input type="text" id="newType1" placeholder="Type1"></td>
+                <td><input type="text" id="newMedia1" placeholder="Media1"></td>
+                <td><input type="text" id="newType2" placeholder="Type2"></td>
+                <td><input type="text" id="newMedia2" placeholder="Media2"></td>
+                <td><input type="text" id="newType3" placeholder="Type3"></td>
+                <td><input type="text" id="newMedia3" placeholder="Media3"></td>
+                <td><input type="text" id="newType4" placeholder="Type4"></td>
+                <td><input type="text" id="newMedia4" placeholder="Media4"></td>
+                <td>
+                    <button class="btn-save" onclick="addTechnician()">Ajouter</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+
+        // Add Technician
+        function addTechnician() {
+            const client = document.getElementById('newClient').value;
+            const nomTechnicien = document.getElementById('newNomTechnicien').value;
+            const type1 = document.getElementById('newType1').value;
+            const media1 = document.getElementById('newMedia1').value;
+            const type2 = document.getElementById('newType2').value;
+            const media2 = document.getElementById('newMedia2').value;
+            const type3 = document.getElementById('newType3').value;
+            const media3 = document.getElementById('newMedia3').value;
+            const type4 = document.getElementById('newType4').value;
+            const media4 = document.getElementById('newMedia4').value;
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'add',
+                    client,
+                    nom_technicien: nomTechnicien,
+                    type1,
+                    media1,
+                    type2,
+                    media2,
+                    type3,
+                    media3,
+                    type4,
+                    media4
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tbody = document.getElementById('technicianTableBody');
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.id = data.technician.id_repertoire;
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${data.technician.client}"></td>
+                        <td><input type="text" value="${data.technician.nom_technicien}"></td>
+                        <td><input type="text" value="${data.technician.type1}"></td>
+                        <td><input type="text" value="${data.technician.media1}"></td>
+                        <td><input type="text" value="${data.technician.type2}"></td>
+                        <td><input type="text" value="${data.technician.media2}"></td>
+                        <td><input type="text" value="${data.technician.type3}"></td>
+                        <td><input type="text" value="${data.technician.media3}"></td>
+                        <td><input type="text" value="${data.technician.type4}"></td>
+                        <td><input type="text" value="${data.technician.media4}"></td>
+                        <td>
+                            <button class="btn-save" onclick="saveTechnician(${data.technician.id_repertoire})">Enregistrer</button>
+                            <button class="btn-delete" onclick="deleteTechnician(${data.technician.id_repertoire})">Supprimer</button>
+                        </td>
+                    `;
+                    tbody.insertBefore(newRow, document.getElementById('addRow'));
+                    document.getElementById('message').innerHTML = `<div>Technicien ajouté avec succès</div>`;
+                } else {
+                    document.getElementById('message').innerHTML = `<div>${data.error}</div>`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Save Edited Technician
+        function saveTechnician(id) {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const inputs = row.querySelectorAll('input');
+            const data = {
+                action: 'edit',
+                id_repertoire: id,
+                client: inputs[0].value,
+                nom_technicien: inputs[1].value,
+                type1: inputs[2].value,
+                media1: inputs[3].value,
+                type2: inputs[4].value,
+                media2: inputs[5].value,
+                type3: inputs[6].value,
+                media3: inputs[7].value,
+                type4: inputs[8].value,
+                media4: inputs[9].value
+            };
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('message').innerHTML = `<div>Technicien mis à jour avec succès</div>`;
+                } else {
+                    document.getElementById('message').innerHTML = `<div>${data.error}</div>`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Delete Technician
+        function deleteTechnician(id) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce technicien ?')) return;
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'delete',
+                    id_repertoire: id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`tr[data-id="${id}"]`).remove();
+                    document.getElementById('message').innerHTML = `<div>Technicien supprimé avec succès</div>`;
+                } else {
+                    document.getElementById('message').innerHTML = `<div>${data.error}</div>`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

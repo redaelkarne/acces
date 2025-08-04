@@ -80,12 +80,23 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dick',
-        'USER': 'root',
-        'PASSWORD': '289ga69LY',
-        'HOST': '192.168.0.214',   
+        'USER': 'astus',
+        'PASSWORD': '123456',
+        'HOST': '192.168.0.12',   
         'PORT': '3366',        
+    },
+    'astreinte_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'astusastreintes',  # Remplacez par le nom de votre base de données
+        'USER': 'alex',  # Remplacez par votre nom d'utilisateur
+        'PASSWORD': 'alex101188',  # Remplacez par votre mot de passe
+        'HOST': '192.168.88.2',
+        'PORT': '3306',  # Port par défaut MySQL, ajustez si nécessaire
     }
 }
+
+# Configuration du routage des bases de données
+DATABASE_ROUTERS = ['accesclient.db_router.DatabaseRouter']
 
 
 # Password validation
@@ -128,3 +139,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Redirection après connexion
+LOGIN_REDIRECT_URL = '/messages_ascenseurs/'
