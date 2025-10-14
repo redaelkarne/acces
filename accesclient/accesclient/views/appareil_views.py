@@ -18,10 +18,12 @@ class AppareilView(LoginRequiredMixin, View):
         user = request.user
 
         # Fetch Appareil records based on user type
-        if user.is_superuser:
-            appareils_list = Appareil.objects.filter(Destinataire=user)
+        
+            # Check if the user exists as Client in Appareil table
+        if Appareil.objects.filter(Client=user.first_name).exists():
+                appareils_list = Appareil.objects.filter(Destinataire=user.first_name)
         else:
-            appareils_list = Appareil.objects.filter(Entretien=user.first_name)
+                appareils_list = Appareil.objects.filter(Entretien=user.first_name)
 
         # Example of excluding specific columns
         excluded_columns = ['s_Lineage', 'dateImport', 'Autres_1', 'Autres_2', 'Observations', 'Id_Societe']
@@ -133,16 +135,12 @@ def generate_excel(request):
     user = request.user
 
     headers = [
-        's_Generation',
-        's_GUID',
-        's_Lineage',
         'N° ID',
         'DateCreation',
         'Client',
         'Opérateur',
         'Entretien',
         'Destinataire',
-        'Télésurveillance',
         'Adresse',
         'Code Postal',
         'Ville',
@@ -150,21 +148,16 @@ def generate_excel(request):
         'Informations',
         'Code Client',
         'Type',
-        'MaJFacture',
         'Incarcération',
         'Code consigne',
         'Consigne volatile',
         'Utilisateur',
-        'Opérateur2',
         'dateImport',
         'MES',
         'RES',
         'Phonie',
         'Transmetteur',
-        'Autres 1',
-        'Autres 2',
         'Observations',
-        'Id Societe'
     ]
 
     for col_num, header in enumerate(headers, 1):
@@ -172,46 +165,53 @@ def generate_excel(request):
 
     appareils = Appareil.objects.filter(Client=user.username)
     for row_num, appareil in enumerate(appareils.iterator(), 2):
-        ws.cell(row=row_num, column=1, value=sanitize_text(appareil.s_Generation))
-        ws.cell(row=row_num, column=2, value=sanitize_text(appareil.s_GUID))
-        ws.cell(row=row_num, column=3, value=sanitize_text(appareil.s_Lineage))
-        ws.cell(row=row_num, column=4, value=appareil.N_ID)
+        # Assigner chaque colonne en respectant l'ordre des headers
+        col = 1
+        ws.cell(row=row_num, column=col, value=appareil.N_ID); col += 1
+        
         if appareil.DateCreation:
             local_date_creation = timezone.localtime(appareil.DateCreation).strftime('%Y-%m-%d %H:%M:%S')
-            ws.cell(row=row_num, column=5, value=local_date_creation)
-        ws.cell(row=row_num, column=6, value=sanitize_text(appareil.Client))
-        ws.cell(row=row_num, column=7, value=sanitize_text(appareil.Opérateur))
-        ws.cell(row=row_num, column=8, value=sanitize_text(appareil.Entretien))
-        ws.cell(row=row_num, column=9, value=sanitize_text(appareil.Destinataire))
-        ws.cell(row=row_num, column=10, value=sanitize_text(appareil.Télésurveillance))
-        ws.cell(row=row_num, column=11, value=sanitize_text(appareil.Adresse))
-        ws.cell(row=row_num, column=12, value=sanitize_text(appareil.Code_Postal))
-        ws.cell(row=row_num, column=13, value=sanitize_text(appareil.Ville))
-        ws.cell(row=row_num, column=14, value=sanitize_text(appareil.Résidence))
-        ws.cell(row=row_num, column=15, value=sanitize_text(appareil.Informations))
-        ws.cell(row=row_num, column=16, value=sanitize_text(appareil.Code_Client))
-        ws.cell(row=row_num, column=17, value=sanitize_text(appareil.Type))
-        ws.cell(row=row_num, column=18, value=appareil.MaJFacture)
-        ws.cell(row=row_num, column=19, value=sanitize_text(appareil.Incarcération))
-        ws.cell(row=row_num, column=20, value=sanitize_text(appareil.Code_consigne))
-        ws.cell(row=row_num, column=21, value=sanitize_text(appareil.Consigne_volatile))
-        ws.cell(row=row_num, column=22, value=sanitize_text(appareil.Utilisateur))
-        ws.cell(row=row_num, column=23, value=sanitize_text(appareil.Opérateur2))
+            ws.cell(row=row_num, column=col, value=local_date_creation); col += 1
+        else:
+            col += 1
+            
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Client)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Opérateur)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Entretien)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Destinataire)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Adresse)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Code_Postal)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Ville)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Résidence)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Informations)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Code_Client)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Type)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Incarcération)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Code_consigne)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Consigne_volatile)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Utilisateur)); col += 1
+        
         if appareil.dateImport:
             local_date_import = timezone.localtime(appareil.dateImport).strftime('%Y-%m-%d %H:%M:%S')
-            ws.cell(row=row_num, column=24, value=local_date_import)
+            ws.cell(row=row_num, column=col, value=local_date_import); col += 1
+        else:
+            col += 1
+            
         if appareil.MES:
             local_mes = timezone.localtime(appareil.MES).strftime('%Y-%m-%d %H:%M:%S')
-            ws.cell(row=row_num, column=25, value=local_mes)
+            ws.cell(row=row_num, column=col, value=local_mes); col += 1
+        else:
+            col += 1
+            
         if appareil.RES:
             local_res = timezone.localtime(appareil.RES).strftime('%Y-%m-%d %H:%M:%S')
-            ws.cell(row=row_num, column=26, value=local_res)
-        ws.cell(row=row_num, column=27, value=sanitize_text(appareil.Phonie))
-        ws.cell(row=row_num, column=28, value=sanitize_text(appareil.Transmetteur))
-        ws.cell(row=row_num, column=29, value=sanitize_text(appareil.Autres_1))
-        ws.cell(row=row_num, column=30, value=sanitize_text(appareil.Autres_2))
-        ws.cell(row=row_num, column=31, value=sanitize_text(appareil.Observations))
-        ws.cell(row=row_num, column=32, value=appareil.Id_Societe)
+            ws.cell(row=row_num, column=col, value=local_res); col += 1
+        else:
+            col += 1
+            
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Phonie)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Transmetteur)); col += 1
+        ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Observations))
 
     output = BytesIO()
     wb.save(output)

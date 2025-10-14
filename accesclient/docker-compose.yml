@@ -15,7 +15,7 @@ services:
       DB_NAME: 'dick'
       DB_USER: 'root'
       DB_PASSWORD: '289ga69LY'
-      DB_HOST: '192.168.0.214'  # Special DNS to reach host machine from container
+      DB_HOST: '192.168.0.12' 
       DB_PORT: '3366'
     extra_hosts:
       # Ensure container can resolve host machine's network

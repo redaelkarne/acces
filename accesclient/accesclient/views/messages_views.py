@@ -22,8 +22,8 @@ class MessagesView(LoginRequiredMixin, View):
         messages = MessagesAscenseursDetails.objects.first()
         
         # Filter messages based on user type
-        if user.is_superuser:
-            messages_list = MessagesAscenseursDetails.objects.filter(Destinataire=user.username)
+        if Appareil.objects.filter(Client=user.first_name).exists():
+            messages_list = MessagesAscenseursDetails.objects.filter(Destinataire=user.first_name)
         else:
             messages_list = MessagesAscenseursDetails.objects.filter(entretien=user.first_name)
         
@@ -86,8 +86,8 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
 
         if messages_list is None:
             # Fetch messages for the user based on user type
-            if user.is_superuser:
-                messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire=user.username)
+            if Appareil.objects.filter(Client=user.first_name).exists():
+                messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire=user.first_name)
             else:
                 messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien=user.first_name)
             

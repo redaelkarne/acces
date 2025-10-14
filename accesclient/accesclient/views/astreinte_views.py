@@ -53,25 +53,30 @@ def view_astreintes(request):
     filter_date = request.GET.get('filter_date', '')
     selected_entretien = request.GET.get('entretien', '')
 
+
+
     # Get delegated users dynamically from Appareil model based on user type
-    if user.is_superuser:
-        # Superuser gets all distinct entretiens from Appareil
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        # User exists as Client - get all distinct entretiens from Appareil
         delegated_users = list(Appareil.objects.filter(
-            Client=user.username
+            Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
+        
+        # Remove None values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_users = [user.username] + delegated_users
     else:
-        # Normal user gets entretiens where they are the Client
-        delegated_users = list(Appareil.objects.filter(
-            Entretien=user.first_name
-        ).values_list('Entretien', flat=True).distinct())
-    
-    # Remove None values and add current user
-    delegated_users = [entretien for entretien in delegated_users if entretien]
-    accessible_users = [user.username] + delegated_users
+        # User doesn't exist as Client - only use user.first_name
+        accessible_users = [user.first_name]
 
     prefix_filters = Q()
-    for username in accessible_users:
-        prefix_filters |= Q(entretien__startswith=username)
+    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
+        # Single user case - use exact match instead of startswith
+        prefix_filters = Q(entretien=user.first_name)
+    else:
+        # Multiple users case - use startswith logic
+        for username in accessible_users:
+            prefix_filters |= Q(entretien__startswith=username)
 
     available_entretiens = list(Astreinte.objects.filter(
         prefix_filters

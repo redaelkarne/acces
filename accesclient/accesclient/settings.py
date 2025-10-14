@@ -57,7 +57,7 @@ ROOT_URLCONF = 'accesclient.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'accesclient', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,7 +140,16 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Configuration SMTP pour les emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'Mail1.sfrbusinessteam.fr'
+EMAIL_PORT = 25
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = 'astus@astus.fr'
+EMAIL_HOST_PASSWORD = 'A123456.'
+DEFAULT_FROM_EMAIL = 'astus@astus.fr'
+EMAIL_TIMEOUT = 60
 
 # Redirection après connexion
 LOGIN_REDIRECT_URL = '/messages_ascenseurs/'

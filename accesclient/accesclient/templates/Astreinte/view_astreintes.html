@@ -246,11 +246,11 @@
                             {% endif %}
                         {% endif %}
                         
-                        {% if astreinte.type3 and astreinte.media3 %}
+                          {% if astreinte.type3 and astreinte.media3 %}
                             | <span class="contact-number">3</span> {% if astreinte.type3|is_phone %}
                             <i class="fas fa-phone" style="color: blue;"></i> {{ astreinte.media3 }}
                             {% elif astreinte.type3|is_email %}
-                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media3 %}
+                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media3 }}
                             {% else %}
                             <i class="fas fa-info-circle" style="color: gray;"></i> {{ astreinte.media3 }}
                             {% endif %}
