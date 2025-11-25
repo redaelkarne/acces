@@ -67,7 +67,7 @@
             <tr>
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
-                        <td class="{{ field_name }}" {% if field_name == 'Informations' %} class="Informations" {% endif %}>
+                        <td class="{{ field_name }}{% if field_name == 'Informations' %} Informations{% endif %}">
                             {% if field_name == 'Informations' %}
                                 {{ appareil.Informations|default_if_none:"--" }}
                             {% else %}

@@ -218,7 +218,27 @@ class Astreinte(models.Model):
         db_table = 'astreinte'  
         verbose_name = 'Astreinte'
         verbose_name_plural = 'Astreintes'
+        app_label = 'accesclient'
 
     def __str__(self):
         return f"{self.entretien} ({self.date_debut} - {self.date_fin})"
-            
+class Repertoire(models.Model):
+    id_repertoire = models.AutoField(primary_key=True)
+    client = models.CharField(max_length=60)
+    nom_technicien = models.CharField(max_length=150)
+    type1 = models.CharField(max_length=30, null=True, blank=True)
+    media1 = models.CharField(max_length=40, null=True, blank=True)
+    type2 = models.CharField(max_length=30, null=True, blank=True)
+    media2 = models.CharField(max_length=40, null=True, blank=True)
+    type3 = models.CharField(max_length=30, null=True, blank=True)
+    media3 = models.CharField(max_length=40, null=True, blank=True)
+    type4 = models.CharField(max_length=30, null=True, blank=True)
+    media4 = models.CharField(max_length=40, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.nom_technicien} ({self.client})"
+    
+    class Meta:
+        db_table = 'repertoire'
+        verbose_name_plural = 'Repertoires'
+        app_label = 'accesclient'

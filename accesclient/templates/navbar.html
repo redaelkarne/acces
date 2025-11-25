@@ -2,6 +2,7 @@
 <body class="navbar-body">
 <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
+
 <nav class="nav-bar">
     <div class="icon-nav">
         <img src="https://i.postimg.cc/C5rXtbbw/ASTUS-logo.jpg" alt="ASTUS Logo" class="logo">
@@ -10,13 +11,18 @@
     </div>
 
     <ul class="list-nav-bar active">
-        <li class="list-item"><a href="/messages_ascenseurs/">Message en cours</a></li>
+        <li class="list-item"><a href="/messages_ascenseurs/">Messages en cours</a></li>
         <li class="list-item"><a href="/archive_messages/">Archives</a></li>
         <li class="list-item"><a href="/appareils/">Base de Données</a></li>
         <li class="list-item"><a href="/astreintes/">Astreintes</a></li>
-        <li class="list-item"><a href="accounts/logout/">Déconnecter</a></li>
+        <li class="list-item">
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                {% csrf_token %}
+            </form>
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Déconnecter</a>
+        </li>
     </ul>
-    <div class="fas burger-menu" id="burger-menu">&#9776;</div>
+    
 </nav>
 
 </body>

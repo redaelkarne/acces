@@ -4,16 +4,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Archive Messages Ascenseurs</title>
+    <title>Archives </title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/stylesarch.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
-    <style>
-        /* Add your custom styles here */
-    </style>
+    
 </head>
 <body>
     {% include 'navbar.html' %}
-    <h1>Archive Messages Ascenseurs</h1>
+    <h1>Archives</h1>
     <form action="{% url 'archive_messages' %}" method="get">
         <button type="submit" name="export" value="true" class="Excel-button">Télécharger les données</button>
     </form>
@@ -30,21 +28,23 @@
     {% endif %}
     
     <!-- Date Range Filter -->
-    <form method="GET" action="" class="horizontal-form">
-        <label for="start_date">Date de début:</label>
-        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
-        
-        <label for="end_date">Date de fin:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
-        
-        <button type="submit" class="filter-button">Filter</button>
-    </form>
+    <div class="date-filter-container">
+        <form method="GET" action="" class="date-filter-form">
+            <label for="start_date" class="date-label">Date de début:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="date-input">
+            
+            <label for="end_date" class="date-label">Date de fin:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="date-input">
+            
+            <button type="submit" class="date-filter-button">Filtrer</button>
+        </form>
+    </div>
     
     
     <!-- Dynamic Filter Dropdown -->
     <div class="button-container">
         <div class="dropdown">
-            <button onclick="toggleDropdown()" class="dropbtn">Filter Columns</button>
+            <button onclick="toggleDropdown()" class="dropbtn">Filtrer les colonnes</button>
             <div id="dropdownMenu" class="dropdown-content">
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
@@ -55,58 +55,66 @@
                 {% endfor %}
             </div>
         </div>
-        <button onclick="applyFilters()" class="apply-button">Apply Filters</button>
+        <button onclick="applyFilters()" class="apply-button">Appliquer le filter</button>
     </div>
-    <div class="table-pagination-container">
+    
     <!-- Display the table -->
-    <table id="messageTable">
-        <thead>
-            <tr class="first-row">
-                <!-- Define table headers with verbose names -->
-                {% for field_name, verbose_name in custom_column_names.items %}
-                    {% if field_name not in excluded_columns %}
-                        <th>{{ verbose_name }}</th>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Populate table body with data -->
-            {% for message in messages_list %}
-                <tr>
+    
+        <table id="messageTable">
+            <thead>
+                <tr class="first-row">
+                    <!-- Define table headers with verbose names -->
                     {% for field_name, verbose_name in custom_column_names.items %}
                         {% if field_name not in excluded_columns %}
-                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
-                                {% if field_name == 'Message' %}
-                                    {{ message.Message }}
-                                {% else %}
-                                    {{ message|attr:field_name }}
-                                {% endif %}
-                            </td>
+                            <th>{{ verbose_name }}</th>
                         {% endif %}
                     {% endfor %}
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <!-- Populate table body with data -->
+                {% for message in messages_list %}
+                    <tr>
+                        {% for field_name, verbose_name in custom_column_names.items %}
+                            {% if field_name not in excluded_columns %}
+                                <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                                    {% if field_name == 'Message' %}
+                                        {{ message.Message|default_if_none:"--" }}
+                                    {% else %}
+                                        {{ message|attr:field_name|default_if_none:"--" }}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
     <div class="pagination">
         <span class="step-links">
             {% if page_obj.has_previous %}
                 <a href="?page=1&start_date={{ start_date }}&end_date={{ end_date }}">First</a>
-                <a href="?page={{ page_obj.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Previous</a>
+                <a href="?page={{ page_obj.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Precedant</a>
+            {% else %}
+                <span class="disabled">First</span>
+                <span class="disabled">Precedant</span>
             {% endif %}
             
             <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                Page {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
             </span>
             
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}&start_date={{ start_date }}&end_date={{ end_date }}">Last</a>
+                <a href="?page={{ page_obj.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Suivant</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&start_date={{ start_date }}&end_date={{ end_date }}">Dernier</a>
+            {% else %}
+                <span class="disabled">Suivant</span>
+                <span class="disabled">Dernier</span>
             {% endif %}
         </span>
     </div>
-</div>
+    
 <!-- <div>
     // <p>Total pages: {{ page_obj.paginator.num_pages }}</p>
     // <p>Current page: {{ page_obj.number }}</p>

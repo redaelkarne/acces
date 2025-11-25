@@ -3,11 +3,13 @@ import re
 import pandas as pd
 from django import forms
 from datetime import datetime
-from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte
+from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import connection
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import AuthenticationForm
+
 class ExcelUploadForm(forms.Form):
     file = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
@@ -45,10 +47,19 @@ class MessageForm(forms.Form):
         )
 
     def get_nature_de_l_appel_choices(self, user):
-        
         if user is None:
             return []
-        choices = ArchiveMessagesAscenseurs.objects.filter(Destinataire=user.username).values_list('Nature_de_l_appel', flat=True).distinct()
+        
+        # Apply the same conditional logic as in views
+        if user.is_superuser:
+            choices = ArchiveMessagesAscenseurs.objects.filter(
+                Destinataire=user.username
+            ).values_list('Nature_de_l_appel', flat=True).distinct()
+        else:
+            choices = ArchiveMessagesAscenseurs.objects.filter(
+                entretien=user.first_name
+            ).values_list('Nature_de_l_appel', flat=True).distinct()
+        
         # Exclude 'Essai cabine' and choices starting with 'Relance'
         filtered_choices = [
             choice for choice in choices
@@ -63,6 +74,7 @@ class MessageForm(forms.Form):
     Téléphone_de_l_appelant = forms.CharField(label="Téléphone de l'appelant", max_length=15)
     Message = forms.CharField(label='Message', widget=forms.Textarea)
     N_ID = forms.IntegerField(widget=forms.HiddenInput(), required=True)
+    
 
 class AppareilModificationForm(forms.ModelForm):
     class Meta:
@@ -116,6 +128,12 @@ class AstreinteForm(forms.ModelForm):
     type4 = forms.ChoiceField(choices=TYPE_CHOICES, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
     media4 = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
+    technician = forms.ModelChoiceField(
+        queryset=Repertoire.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True,
+        label="Repertoire"
+    )       
     class Meta:
         model = Astreinte
         fields = [
@@ -124,6 +142,15 @@ class AstreinteForm(forms.ModelForm):
             'type1', 'media1', 'type2', 'media2',
             'type3', 'media3', 'type4', 'media4'
         ]
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Safely get user from kwargs
+        super().__init__(*args, **kwargs)
+
+        if user:
+            # Filter technicians based on the logged-in user's client
+            filtered_technicians = Repertoire.objects.filter(client=user.username)
+            print("Filtered Technicians Queryset:", filtered_technicians)  # Print queryset to debug
+            self.fields['technician'].queryset = filtered_technicians
 
     def clean(self):
         cleaned_data = super().clean()
@@ -262,3 +289,22 @@ def process_excel_file(file, created_by):
         return [str(e)]  
     except Exception as e:
         return [f"Une erreur s'est produite : {str(e)}"]  
+class TechnicianForm(forms.ModelForm):
+    class Meta:
+        model = Repertoire
+        fields = ['nom_technicien', 'client']
+class RepertoireForm(forms.ModelForm):
+    class Meta:
+        model = Repertoire
+        fields = ['client', 'nom_technicien', 'type1', 'media1', 'type2', 'media2', 'type3', 'media3', 'type4', 'media4']
+
+class LastNameAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Nom",
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': 'Nom de famille'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Nom de famille'

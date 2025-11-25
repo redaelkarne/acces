@@ -1,22 +1,19 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins','Open Sans',Arial;
+    font-family: 'Poppins', 'Open Sans', Arial;
 }
 
-navbar-body {
+.navbar-body {
     min-height: 100vh;
-    background-image:linear-gradient(90deg, rgba(219,209,209,1) 0%, rgba(244,238,244,1) 39%, rgba(181,171,191,1) 70%);
-
+    background-image: linear-gradient(90deg, rgba(219, 209, 209, 1) 0%, rgba(244, 238, 244, 1) 39%, rgba(181, 171, 191, 1) 70%);
     background-size: cover;
     background-position: center;
 }
-
 
 .nav-bar {
     display: flex;
@@ -24,28 +21,42 @@ navbar-body {
     align-items: center;
     padding: 25px 1.5rem;
     height: 60px;
-    background-image:linear-gradient(90deg, rgba(36,0,27,1) 4%, rgba(121,9,83,1) 54%, rgba(255,0,245,1) 89%);
+    background-image: linear-gradient(90deg, rgba(36, 0, 27, 1) 4%, rgba(121, 9, 83, 1) 54%, rgba(255, 0, 245, 1) 89%);
     background-color: rgba(0, 0, 0, 0.2);
-    margin-bottom: 40px; /* Add margin-bottom here */
+    margin-bottom: 40px;
+    width: 100%;
+    border-radius: 0; /* Straight borders */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.nav-bar:hover {
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 .logo {
-    width: 50px; /* Adjust width and height as needed */
+    width: 50px;
     height: auto;
-    margin-right: 15px; /* Adjust margin as needed */
+    margin-right: 15px;
     margin-top: 10px;
 }
+
 .fas {
     color: white;
     font-size: 1.25rem;
     cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.fas:hover {
+    transform: scale(1.2);
 }
 
 .list-nav-bar {
     list-style: none;
     text-transform: uppercase;
     display: flex;
-    gap: 20px;
+    gap: 30px;
 }
 
 .list-item a {
@@ -56,10 +67,30 @@ navbar-body {
     text-align: center;
     margin-left: 0.5rem;
     letter-spacing: 0.1rem;
+    font-weight: 600;
+    position: relative;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .list-item a:hover {
     color: #e29bc2;
+    transform: translateY(-2px);
+}
+
+.list-item a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #e29bc2;
+    bottom: -5px;
+    left: 0;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.list-item a:hover::after {
+    transform: scaleX(1);
 }
 
 .burger-menu {
@@ -74,47 +105,46 @@ navbar-body {
 .main-content h1 {
     color: #fff;
     font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 0.1rem;
 }
 
-
-@media screen and (max-width: 768px) {
-
-    .list-item a {
-        font-size: 0.875rem;
-    }
-
-    .logo {
-        font-size: 0.875rem;
-    }
-}
-
-@media screen and (max-width: 578px) {
-
-    .list-item a {
-        font-size: 1rem;
-
-    }
-
-    .list-nav-bar.active {
-        right: 0;
+/* Media Queries for Phone Adaptability */
+@media (max-width: 768px) {
+    .nav-bar {
+        flex-direction: column;
+        height: auto;
+        padding: 15px 1rem;
     }
 
     .list-nav-bar {
-        display: flex;
-        position: fixed;
-        right: -100%;
-        top: 60px;
-        width: 35%;
-        background-color: rgba(0, 0, 0, 0.2);
-        text-align: center;
         flex-direction: column;
-        transition: 0.7s;
-        gap: 18px;
-        border-radius: 0 0 10px 10px;
+        gap: 15px;
     }
 
-    .burger-menu {
-        display: block;
-        cursor: pointer;
+    .list-item a {
+        font-size: 1rem;
+    }
+
+    .main-content h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-bar {
+        padding: 10px 0.5rem;
+    }
+
+    .list-nav-bar {
+        gap: 10px;
+    }
+
+    .list-item a {
+        font-size: 0.875rem;
+    }
+
+    .main-content h1 {
+        font-size: 2rem;
     }
 }

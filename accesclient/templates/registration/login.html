@@ -37,18 +37,17 @@ body{
 .shape:first-child{
     background: linear-gradient(
         #1845ad,
-        #23a2f6
+        rgb(216, 16, 183)
     );
     left: -80px;
     top: -80px;
 }
 .shape:last-child{
     background: linear-gradient(
-        to right,
-        #ff512f,
-        #f09819
+        #1845ad,
+rgb(216, 16, 183)
     );
-    right: -30px;
+    right: -80px;
     bottom: -80px;
 }
 form{
@@ -136,6 +135,34 @@ button{
     </style>
 </head>
 <body>
+  <!-- MODAL EMAIL REQUIS -->
+  {% if show_email_modal %}
+  <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; max-width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+          <h3 style="margin-top: 0; color: #d9534f; text-align: center;">Email Manquant</h3>
+          <p style="color: #333; text-align: center; margin-bottom: 20px;">Pour des raisons de sécurité et de contact, vous devez renseigner une adresse email valide pour accéder à votre compte.</p>
+          
+          <form method="post" action="" style="position: static; transform: none; width: 100%; height: auto; background: transparent; border: none; box-shadow: none; padding: 0;">
+              {% csrf_token %}
+              <!-- Ces champs cachés permettent de reconnecter l'utilisateur directement -->
+              <input type="hidden" name="username" value="{{ username }}">
+              <input type="hidden" name="password" value="{{ password }}">
+              <input type="hidden" name="update_email" value="true">
+              
+              <div style="margin-bottom: 20px;">
+                  <label for="email_input" style="display:block; margin-bottom:5px; font-weight:bold; color: #333; margin-top: 0;">Votre Email :</label>
+                  <input type="email" id="email_input" name="email" required placeholder="exemple@domaine.com" 
+                         style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; color: #333;">
+              </div>
+              
+              <button type="submit" style="background: #0275d8; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;">
+                  Enregistrer et Connexion
+              </button>
+          </form>
+      </div>
+  </div>
+  {% endif %}
+
   <div class="container">
       <div class="left-half">
           <div class="background">
@@ -147,13 +174,30 @@ button{
           <div class="login-container">
               
               <h2>Login</h2>
+              {% if messages %}
+              <ul class="messages" style="list-style: none; padding: 0; margin-bottom: 20px; text-align: center;">
+                  {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: #ff4444; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 4px;">{{ message }}</li>
+                  {% endfor %}
+              </ul>
+              {% endif %}
               {% block content %}
               
-              <form method="post">
+              <form method="post" action="{% url 'login' %}">
                 <img src="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" alt="ASTUS Logo" class="logo" style="display: block; margin: 0 auto;">
                   {% csrf_token %}
-                  {{ form.as_p }}
+                  
+                  <label for="username">Identifiant</label>
+                  <input type="text" name="username" id="username" placeholder="Votre identifiant" required>
+
+                  <label for="password">Mot de passe</label>
+                  <input type="password" name="password" id="password" placeholder="Votre mot de passe" required>
+
                   <button type="submit">Identifier</button>
+                  
+                  <div style="text-align: center; margin-top: 15px;">
+                      <a href="{% url 'password_reset' %}" style="color: #ffffff; text-decoration: none; font-size: 14px;">Mot de passe oublié ?</a>
+                  </div>
               </form>
               {% endblock %}
               

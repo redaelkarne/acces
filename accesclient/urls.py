@@ -23,7 +23,7 @@ from .views import export_messages_to_excel
 from .views import AppareilView,ArchiveMessagesView
 from .views import create_message ,modify_appareil
 from .views import export_appareils_to_excel
-from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte
+from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte,ManageTechniciansView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,12 +33,12 @@ urlpatterns = [
     path('export_appareils/', export_appareils_to_excel, name='export_appareils'),
     path('appareil/<int:id>/set_perdu/', set_appareil_perdu, name='set_appareil_perdu'),
     path('appareil/<int:id>/modify_autres/', modify_autres_if_meditrax, name='modify_autres_if_meditrax'),
+    # Login/logout URLs - Placed before include to override default auth views
+    path('accounts/login/', views.login_view, name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('archive_messages/', ArchiveMessagesView.as_view(), name='archive_messages'),
     path('export_archive_messages/', ArchiveMessagesView.as_view(), name='export_archive_messages'),
-    # Login/logout URLs
-    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     # Password reset URLs
     path('accounts/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
@@ -57,4 +57,7 @@ urlpatterns = [
     path('astreintes/', views.view_astreintes, name='view_astreintes'),
     path('astreinte/<int:id_astreinte>/modifier/', views.modify_astreinte, name='modify_astreinte'),
     path('astreinte/delete/<int:id_astreinte>/', views.delete_astreinte, name='delete_astreinte'),
+    path('get-technician-data/<int:technician_id>/', views.get_technician_data, name='get_technician_data'),
+    path('manage-technicians/', views.ManageTechniciansView.as_view(), name='manage_technicians'),
+    
 ]

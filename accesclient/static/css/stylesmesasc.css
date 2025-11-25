@@ -8,7 +8,7 @@
 /* Global styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #E1EBEE;
 }
 
 h1 {
@@ -29,7 +29,7 @@ label {
 table {
     width: 120%; /* Adjust the width as needed */
     margin: 1% auto;
-    margin-left: 5%;
+    margin-left: 4%;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -41,7 +41,7 @@ table {
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center;
     white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
 }
 
@@ -127,17 +127,18 @@ tr:hover {
 }
 
 .dropbtn {
-    background-color: #4CAF50;
+    background-color: #800080;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
     margin-right: 10px;
+    border-radius: 5px;
 }
 
 .dropbtn:hover, .apply-button:hover {
-    background-color: #45a049;
+    background-color: #8a4b8a;
 }
 
 .dropdown {
@@ -162,21 +163,23 @@ tr:hover {
 }
 
 .apply-button {
-    background-color: #008CBA;
+    background-color: #be49be;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 .Excel-button {
-    background-color: #00ba3e;
+    background-color: #007bff;
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
     margin-left: 80px;
+    border-radius: 5px;
 }
 .pagination {
     margin-top: -4500px; /* Adjust this value as needed */
@@ -217,6 +220,85 @@ tr:hover {
     padding: 8px 16px;
     color: #333;
 }
+
+/* Entretien Selector Styles */
+.entretien-selector {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin: 20px 0 20px 80px;
+    max-width: 500px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.entretien-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.entretien-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.entretien-select {
+    padding: 10px 15px;
+    border: 2px solid #ced4da;
+    border-radius: 6px;
+    background-color: white;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.entretien-select:hover {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.entretien-select:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.entretien-select option {
+    padding: 8px;
+    background-color: white;
+    color: #495057;
+}
+
+.entretien-select option:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive design for entretien selector */
+@media (max-width: 768px) {
+    .entretien-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .entretien-select {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .entretien-selector {
+        margin: 15px;
+        padding: 15px;
+    }
+}
+
 .flash-red {
     animation: flash-red-animation 1s infinite;
 }
