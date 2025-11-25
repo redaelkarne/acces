@@ -49,4 +49,10 @@ def is_email(value):
     value_lower = str(value).lower()
     email_keywords = ['email', 'mail', 'courriel', 'e-mail']
     return any(keyword in value_lower for keyword in email_keywords)
-    return any(keyword in value_lower for keyword in email_keywords)
+
+@register.simple_tag(takes_context=True)
+def url_replace(context, **kwargs):
+    query = context['request'].GET.copy()
+    for k, v in kwargs.items():
+        query[k] = v
+    return query.urlencode()

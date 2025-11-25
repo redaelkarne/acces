@@ -37,6 +37,11 @@ class MessagesView(LoginRequiredMixin, View):
         if selected_entretien:
             messages_list = messages_list.filter(entretien=selected_entretien)
         
+        # Pagination
+        paginator = Paginator(messages_list, 20)  # Show 20 messages per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         excluded_columns = ['Stocké', 'Incarcération', 'Opérateur', 'Confirmation', 'ConfIncar', 'ConfIncar2', 'Commentaires', 'Autres1', 'Autres2', 'Etat', 'Téléphone_2', 'N_ID', 'N_des_messages']  
         custom_column_names = {
             'Date': 'Date du message',
@@ -55,14 +60,15 @@ class MessagesView(LoginRequiredMixin, View):
         }
 
         # Combine the content of the three columns into one called 'Résidence'
-        for message in messages_list:
+        for message in page_obj:
             message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
         
         selected_columns = [field_name for field_name in messages.get_fields() if request.GET.get(field_name)]
 
         return render(request, 'accesclient/mesasc.html', {
             'messages': messages,
-            'messages_list': messages_list,
+            'messages_list': page_obj,
+            'page_obj': page_obj,
             'selected_columns': selected_columns,
             'excluded_columns': excluded_columns,
             'custom_column_names': custom_column_names,

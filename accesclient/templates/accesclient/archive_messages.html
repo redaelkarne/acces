@@ -91,29 +91,40 @@
             </tbody>
         </table>
     
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1&start_date={{ start_date }}&end_date={{ end_date }}">First</a>
-                <a href="?page={{ page_obj.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Precedant</a>
-            {% else %}
-                <span class="disabled">First</span>
-                <span class="disabled">Precedant</span>
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li><a href="?{% url_replace page=1 %}">&laquo; First</a></li>
+            <li><a href="?{% url_replace page=page_obj.previous_page_number %}">&#9664; Previous</a></li>
+        {% endif %}
+
+        {% if page_obj.number > 1 %}
+            <li><a href="?{% url_replace page=1 %}">1</a></li>
+            {% if page_obj.number > 2 %}
+                <li><span>...</span></li>
             {% endif %}
-            
-            <span class="current">
-                Page {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
-            </span>
-            
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">Suivant</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}&start_date={{ start_date }}&end_date={{ end_date }}">Dernier</a>
-            {% else %}
-                <span class="disabled">Suivant</span>
-                <span class="disabled">Dernier</span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-5' and num <= page_obj.number|add:'5' %}
+                {% if page_obj.number == num %}
+                    <li class="current">{{ num }}</li>
+                {% else %}
+                    <li><a href="?{% url_replace page=num %}">{{ num }}</a></li>
+                {% endif %}
             {% endif %}
-        </span>
-    </div>
+        {% endfor %}
+
+        {% if page_obj.number < page_obj.paginator.num_pages %}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-1' %}
+                <li><span>...</span></li>
+            {% endif %}
+            <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a></li>
+            <li><a href="?{% url_replace page=page_obj.next_page_number %}">Next &#9654;</a></li>
+        {% endif %}
+    </ul>
+    {% endif %}
     
 <!-- <div>
     // <p>Total pages: {{ page_obj.paginator.num_pages }}</p>

@@ -1,0 +1,8 @@
+Django==4.1
+mysqlclient
+openpyxl
+pandas
+requests
+msal
+whitenoise
+python-dotenv
