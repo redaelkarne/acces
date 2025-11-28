@@ -11,6 +11,9 @@ from django.core.cache import cache
 from openpyxl import Workbook
 import csv
 from datetime import datetime
+import json
+import os
+from django.conf import settings
 
 from ..models import MessagesAscenseurs, MessagesAscenseursDetails, ArchiveMessagesAscenseurs, Appareil
 from ..forms import MessageDetailForm, MessageForm
@@ -21,14 +24,32 @@ class MessagesView(LoginRequiredMixin, View):
         user = request.user
         messages = MessagesAscenseursDetails.objects.first()
         
+        # 1. Liste par défaut (comportement actuel)
+        accessible_accounts = [user.first_name]
+
+        # 2. Tentative de chargement du JSON
+        json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    # Si l'utilisateur est dans le fichier, on étend ses droits
+                    if user.first_name in config:
+                        accessible_accounts.extend(config[user.first_name])
+            except Exception as e:
+                print(f"Erreur lecture JSON: {e}")
+
         # Filter messages based on user type
-        if Appareil.objects.filter(Client=user.first_name).exists():
-            messages_list = MessagesAscenseursDetails.objects.filter(Destinataire=user.first_name)
+        is_client = Appareil.objects.filter(Client=user.first_name).exists()
+        if is_client:
+            messages_list = MessagesAscenseursDetails.objects.filter(Destinataire__in=accessible_accounts)
+            # For clients, derive entretiens from the messages
+            entretiens = list(messages_list.values_list('entretien', flat=True).distinct())
         else:
-            messages_list = MessagesAscenseursDetails.objects.filter(entretien=user.first_name)
-        
-        # Get unique "Entretien" values for the user
-        entretiens = messages_list.values_list('entretien', flat=True).distinct()
+            messages_list = MessagesAscenseursDetails.objects.filter(entretien__in=accessible_accounts)
+            # For maintenance users, use the accessible_accounts list directly
+            # This ensures the dropdown appears even if there are no active messages for some agencies
+            entretiens = sorted(list(set(accessible_accounts)))
         
         # Get the selected "Entretien" from GET parameters
         selected_entretien = request.GET.get('entretien')
@@ -44,6 +65,7 @@ class MessagesView(LoginRequiredMixin, View):
 
         excluded_columns = ['Stocké', 'Incarcération', 'Opérateur', 'Confirmation', 'ConfIncar', 'ConfIncar2', 'Commentaires', 'Autres1', 'Autres2', 'Etat', 'Téléphone_2', 'N_ID', 'N_des_messages']  
         custom_column_names = {
+            'entretien': 'Agence',
             'Date': 'Date du message',
             'Nature_de_l_appel': 'Type d\'appel',
             'code_client': 'N°APP',
@@ -87,15 +109,38 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
         end_date_str = request.GET.get('end_date')
 
         # Build cache key based on date range
+        # Include 'entretien' in cache key to cache filtered results separately if needed, 
+        # OR handle filtering after cache retrieval. 
+        # Here we filter AFTER cache retrieval to keep cache generic for the date range.
+        selected_entretien = request.GET.get('entretien')
+        
         cache_key = f'archive_messages_{user.username}_{start_date_str}_{end_date_str}'
-        messages_list = cache.get(cache_key)
+        cached_data = cache.get(cache_key)
+        
+        messages_list = None
+        entretiens = []
 
-        if messages_list is None:
+        if cached_data is None:
+            # 1. Liste par défaut (comportement actuel)
+            accessible_accounts = [user.first_name]
+
+            # 2. Tentative de chargement du JSON
+            json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+            if os.path.exists(json_path):
+                try:
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        config = json.load(f)
+                        if user.first_name in config:
+                            accessible_accounts.extend(config[user.first_name])
+                except Exception as e:
+                    print(f"Erreur lecture JSON: {e}")
+
             # Fetch messages for the user based on user type
-            if Appareil.objects.filter(Client=user.first_name).exists():
-                messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire=user.first_name)
+            is_client = Appareil.objects.filter(Client=user.first_name).exists()
+            if is_client:
+                messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
             else:
-                messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien=user.first_name)
+                messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
             
             # Determine the date range
             if start_date_str and end_date_str:
@@ -117,9 +162,36 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
 
             # Apply the date range filter
             messages_list = messages_list.filter(Date__range=[start_date, end_date])
+            
+            # Get unique "Entretien" values for the user (AFTER date filtering to be relevant)
+            entretiens = list(messages_list.values_list('entretien', flat=True).distinct())
 
-            # Cache the results
-            cache.set(cache_key, messages_list, timeout=60*15)  # Cache timeout of 15 minutes
+            # Get the selected "Entretien" from GET parameters
+            selected_entretien = request.GET.get('entretien')
+
+            # Filter messages based on selected "Entretien"
+            if selected_entretien:
+                messages_list = messages_list.filter(entretien=selected_entretien)
+
+            # Cache the results (including entretiens list to avoid re-querying)
+            cache_data = {
+                'messages_list': messages_list,
+                'entretiens': entretiens
+            }
+            cache.set(cache_key, cache_data, timeout=60*15)  # Cache timeout of 15 minutes
+        else:
+            # Retrieve from cache structure
+            if isinstance(cached_data, dict):
+                entretiens = cached_data.get('entretiens', [])
+                messages_list = cached_data.get('messages_list')
+            else:
+                # Fallback/Legacy cache
+                messages_list = cached_data
+                entretiens = []
+
+            # Apply entretien filter on cached results if needed
+            if selected_entretien and messages_list:
+                messages_list = messages_list.filter(entretien=selected_entretien)
 
         # Pagination
         paginator = Paginator(messages_list, 150)  # Show 150 messages per page
@@ -134,16 +206,31 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'Stocké', 'Incarcération', 'Opérateur', 'Confirmation', 
             'ConfIncar', 'ConfIncar2', 'Commentaires', 'Autres1', 
             'Autres2', 'Etat', 'Téléphone_2', 'N_ID', 'N_des_messages',
-            'Destinataire'
         ]
 
         # Generate custom column names dynamically
         custom_column_names = {field.name: field.verbose_name for field in ArchiveMessagesAscenseurs._meta.get_fields() if field.name not in excluded_columns}
+        custom_column_names['entretien'] = 'Agence'
         selected_columns = [field.name for field in ArchiveMessagesAscenseurs._meta.get_fields() if request.GET.get(field.name)]
 
         # Handle export functionality
         if 'export' in request.GET:
-            return self.export_to_csv(page_obj, selected_columns)
+            # Apply filters again for export (since page_obj is paginated)
+            # We need the full list for export, filtered by date and entretien
+            export_list = messages_list # This is already filtered by date and entretien (if applied)
+            return self.export_to_csv(export_list, selected_columns)
+
+        # Recalculate accessible_accounts for context (since it's not cached)
+        accessible_accounts = [user.first_name]
+        json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    if user.first_name in config:
+                        accessible_accounts.extend(config[user.first_name])
+            except Exception:
+                pass
 
         return render(request, 'accesclient/archive_messages.html', {
             'messages': messages,
@@ -154,6 +241,8 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'custom_column_names': custom_column_names,
             'start_date': start_date_str,
             'end_date': end_date_str,
+            'entretiens': entretiens,
+            'selected_entretien': selected_entretien,
         })
 
     def export_to_csv(self, messages_list, selected_columns):
@@ -232,7 +321,32 @@ def create_message(request, N_ID):
 
 def export_messages_to_excel(request):
     user = request.user
-    messages = MessagesAscenseurs.objects.filter(Destinataire=user.username)
+    
+    # 1. Liste par défaut (comportement actuel)
+    accessible_accounts = [user.first_name]
+
+    # 2. Tentative de chargement du JSON
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_accounts.extend(config[user.first_name])
+        except Exception:
+            pass
+
+    # Filter messages based on user type using MessagesAscenseursDetails to get 'entretien'
+    is_client = Appareil.objects.filter(Client=user.first_name).exists()
+    if is_client:
+        messages = MessagesAscenseursDetails.objects.filter(Destinataire__in=accessible_accounts)
+    else:
+        messages = MessagesAscenseursDetails.objects.filter(entretien__in=accessible_accounts)
+
+    # Apply Entretien filter if present
+    selected_entretien = request.GET.get('entretien')
+    if selected_entretien:
+        messages = messages.filter(entretien=selected_entretien)
 
     wb = Workbook()
     ws = wb.active
@@ -254,7 +368,8 @@ def export_messages_to_excel(request):
         'Ville de l\'appelant',
         'Téléphone de l\'appelant',
         'Digicode de l\'appelant',
-        'Nature de l\'appel'
+        'Nature de l\'appel',
+        'Agence' # Added Agence column
     ]
 
     # Write headers to the first row in the worksheet
@@ -265,9 +380,12 @@ def export_messages_to_excel(request):
     for row_num, message in enumerate(messages, 2):  # Start from row 2 for data
         ws.cell(row=row_num, column=1, value=message.Destinataire)
         # Convert timezone-aware datetime to local timezone
-        local_date = timezone.localtime(message.Date)
-        # Set tzinfo=None to avoid Excel error
-        ws.cell(row=row_num, column=2, value=local_date.replace(tzinfo=None))
+        if message.Date:
+            local_date = timezone.localtime(message.Date)
+            ws.cell(row=row_num, column=2, value=local_date.replace(tzinfo=None))
+        else:
+            ws.cell(row=row_num, column=2, value="")
+            
         ws.cell(row=row_num, column=3, value=message.Message)
         ws.cell(row=row_num, column=4, value=message.Nom)
         ws.cell(row=row_num, column=5, value=message.Téléphone)
@@ -281,6 +399,7 @@ def export_messages_to_excel(request):
         ws.cell(row=row_num, column=13, value=message.Téléphone_de_l_appelant)
         ws.cell(row=row_num, column=14, value=message.Digicode_de_l_appelant)
         ws.cell(row=row_num, column=15, value=message.Nature_de_l_appel)
+        ws.cell(row=row_num, column=16, value=message.entretien) # Added Agence value
 
     filename = f"messages_{user.username}.xlsx"
 

@@ -1,9 +1,13 @@
 # astreinte_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, BooleanField
 from django.contrib import messages
 from datetime import datetime, timedelta
+from django.utils import timezone
+import json
+import os
+from django.conf import settings
 
 from ..models import Astreinte, Appareil
 from ..forms import AstreinteForm, ExcelUploadForm, process_excel_file
@@ -69,6 +73,17 @@ def view_astreintes(request):
         # User doesn't exist as Client - only use user.first_name
         accessible_users = [user.first_name]
 
+    # Load additional access from JSON config
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
     prefix_filters = Q()
     if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
         # Single user case - use exact match instead of startswith
@@ -91,11 +106,24 @@ def view_astreintes(request):
     if selected_entretien:
         filters &= Q(entretien=selected_entretien)
 
-    try:
-        search_date = datetime.strptime(search_query, '%Y-%m-%d')
-        filters &= Q(date_debut__lte=search_date) & Q(date_fin__gte=search_date)
-    except ValueError:
-        if search_query:
+    # Check if user is applying any specific search or date filter
+    has_search_filter = bool(search_query)
+    has_date_filter = bool(filter_date)
+
+    if not has_search_filter and not has_date_filter:
+        # Default view: Show currently active astreintes (by day and hour)
+        now = timezone.now()
+        filters &= Q(date_debut__lte=now) & Q(date_fin__gte=now)
+        
+        # Default sort to priority if not explicitly set by user
+        if 'sort' not in request.GET:
+            sort_order = 'priorite'
+
+    if has_search_filter:
+        try:
+            search_date = datetime.strptime(search_query, '%Y-%m-%d')
+            filters &= Q(date_debut__lte=search_date) & Q(date_fin__gte=search_date)
+        except ValueError:
             search_filters = (
                 Q(detail_astreinte__icontains=search_query) |
                 Q(operator_create__icontains=search_query) |
@@ -106,11 +134,12 @@ def view_astreintes(request):
             )
             filters &= search_filters
 
-    try:
-        filter_date_parsed = datetime.strptime(filter_date, '%Y-%m-%d')
-        filters &= Q(date_debut__lte=filter_date_parsed + timedelta(days=1)) & Q(date_fin__gte=filter_date_parsed)
-    except ValueError:
-        pass
+    if has_date_filter:
+        try:
+            filter_date_parsed = datetime.strptime(filter_date, '%Y-%m-%d')
+            filters &= Q(date_debut__lte=filter_date_parsed + timedelta(days=1)) & Q(date_fin__gte=filter_date_parsed)
+        except ValueError:
+            pass
 
     astreintes = Astreinte.objects.filter(filters).order_by(sort_order)
 

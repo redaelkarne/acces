@@ -15,8 +15,13 @@
     <h1>Messages en cours</h1>
     
     <form action="{% url 'export_messages' %}" method="get">
+        {% if selected_entretien %}
+            <input type="hidden" name="entretien" value="{{ selected_entretien }}">
+        {% endif %}
         <button type="submit" class="Excel-button">Télécharger les données</button>
     </form>
+
+
 
     {% if entretiens|length > 1 %}
     <div class="entretien-selector">

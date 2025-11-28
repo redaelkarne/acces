@@ -8,6 +8,84 @@
     <title>Astreintes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        /* Styles copiés de stylesmesasc.css pour le sélecteur d'entretien */
+        .entretien-selector {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 20px 0 20px 25px; /* Adjusted margin to match search-sort */
+            max-width: 500px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .entretien-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .entretien-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .entretien-select {
+            padding: 10px 15px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            background-color: white;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .entretien-select:hover {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .entretien-select:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .entretien-select option {
+            padding: 8px;
+            background-color: white;
+            color: #495057;
+        }
+
+        .entretien-select option:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Responsive design for entretien selector */
+        @media (max-width: 768px) {
+            .entretien-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .entretien-select {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .entretien-selector {
+                margin: 15px;
+                padding: 15px;
+            }
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -192,14 +270,10 @@
                     <option value="date_fin" {% if sort_order == 'date_fin' %}selected{% endif %}>Trier par date fin</option>
                     <option value="priorite" {% if sort_order == 'priorite' %}selected{% endif %}>Trier par priorité</option>
                 </select>
-                <select name="entretien" onchange="this.closest('form').submit()">
-                    {% for entretien in available_entretiens %}
-                        <option value="{{ entretien }}" 
-                                {% if entretien == selected_entretien %}selected{% endif %}>
-                            {{ entretien }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <!-- Hidden input to preserve selected entretien when searching/sorting -->
+                {% if selected_entretien %}
+                    <input type="hidden" name="entretien" value="{{ selected_entretien }}">
+                {% endif %}
                 <button type="submit">Appliquer</button>
             </form>
             
@@ -210,11 +284,30 @@
             <button type="button" onclick="location.reload();" style="margin-top: 10px; float: right;">Rafraîchir</button>
         </div>
 
+        {% if available_entretiens|length > 1 %}
+        <div class="entretien-selector">
+            <form method="GET" action="" class="entretien-form">
+                <!-- Preserve search and sort filters -->
+                <input type="hidden" name="q" value="{{ search_query }}">
+                <input type="hidden" name="filter_date" value="{{ filter_date }}">
+                <input type="hidden" name="sort" value="{{ sort_order }}">
+                
+                <label for="entretien" class="entretien-label">Sélectionner l'entretien:</label>
+                <select name="entretien" id="entretien" class="entretien-select" onchange="this.form.submit()">
+                    <option value="">--Sélectionner un entretien--</option>
+                    {% for entretien in available_entretiens %}
+                        <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        {% endif %}
+
         <!-- Astreintes Cards -->
         {% for astreinte in astreintes %}
         <div class="astreinte-card">
             <div class="card-header">
-                <span>{{ astreinte.operator_create }}</span>
+                <span>{{ astreinte.entretien }}</span>
             </div>
             <table class="card-table">
                 <tr>

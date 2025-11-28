@@ -14,7 +14,110 @@
     <h1>Archives</h1>
     <form action="{% url 'archive_messages' %}" method="get">
         <button type="submit" name="export" value="true" class="Excel-button">Télécharger les données</button>
+        <!-- Preserve filters for export -->
+        <input type="hidden" name="start_date" value="{{ start_date }}">
+        <input type="hidden" name="end_date" value="{{ end_date }}">
+        <input type="hidden" name="entretien" value="{{ selected_entretien }}">
     </form>
+
+    {% if entretiens|length > 1 %}
+    <div class="entretien-selector">
+        <form method="GET" action="" class="entretien-form">
+            <!-- Preserve date filters -->
+            <input type="hidden" name="start_date" value="{{ start_date }}">
+            <input type="hidden" name="end_date" value="{{ end_date }}">
+            
+            <label for="entretien" class="entretien-label">Sélectionner l'entretien:</label>
+            <select name="entretien" id="entretien" class="entretien-select" onchange="this.form.submit()">
+                <option value="">--Sélectionner un entretien--</option>
+                {% for entretien in entretiens %}
+                    <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    <style>
+        /* Styles copiés de stylesmesasc.css pour le sélecteur d'entretien */
+        .entretien-selector {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 20px 0 20px 80px;
+            max-width: 500px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .entretien-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .entretien-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .entretien-select {
+            padding: 10px 15px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            background-color: white;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .entretien-select:hover {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .entretien-select:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .entretien-select option {
+            padding: 8px;
+            background-color: white;
+            color: #495057;
+        }
+
+        .entretien-select option:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Responsive design for entretien selector */
+        @media (max-width: 768px) {
+            .entretien-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .entretien-select {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .entretien-selector {
+                margin: 15px;
+                padding: 15px;
+            }
+        }
+    </style>
+
     {% if filter_values|length > 1 %}
     <form method="GET" action="">
         <label for="filter_value">Select Nature de l'appel:</label>
@@ -30,6 +133,9 @@
     <!-- Date Range Filter -->
     <div class="date-filter-container">
         <form method="GET" action="" class="date-filter-form">
+            <!-- Preserve entretien filter -->
+            <input type="hidden" name="entretien" value="{{ selected_entretien }}">
+            
             <label for="start_date" class="date-label">Date de début:</label>
             <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="date-input">
             

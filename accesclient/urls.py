@@ -24,8 +24,10 @@ from .views import AppareilView,ArchiveMessagesView
 from .views import create_message ,modify_appareil
 from .views import export_appareils_to_excel
 from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte,ManageTechniciansView
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='login'), name='home'),
     path('admin/', admin.site.urls),
     path('messages_ascenseurs/', views.MessagesView.as_view(), name='MessagesAscenseurs'),
     path('export-messages/', export_messages_to_excel, name='export_messages'),
