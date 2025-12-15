@@ -26,6 +26,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://webclient.astus.fr:8090',
     'http://webclient.astus.fr',
     'https://webclient.astus.fr',
+    'http://acces.onrender.com.fr:8090',
+    'https://acces.onrender.com:8090',
+    'http://acces.onrender.com.fr',
+    'https://acces.onrender.com.fr',
 ]
 
 # ------------------------------
