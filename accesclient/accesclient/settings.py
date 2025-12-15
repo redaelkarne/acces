@@ -27,9 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://webclient.astus.fr:8090',
+    'https://webclient.astus.fr:8090',
+    'http://webclient.astus.fr',
+    'https://webclient.astus.fr',
+]
 
 
 # Application definition
