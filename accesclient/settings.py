@@ -26,10 +26,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://webclient.astus.fr:8090', 
     'http://webclient.astus.fr',
     'https://webclient.astus.fr',
-    'http://acces.onrender.com.fr:8090',
-    'https://acces.onrender.com:8090',
-    'http://acces.onrender.com',
-    'https://acces.onrender.com'
+    'http://acces-client.onrender.com:8090',
+    'https://acces-client.onrender.com:8090',
+    'http://acces-client.onrender.com',
+    'https://acces-client.onrender.com',
 ]
 
 # ------------------------------
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",  # for serving static files
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # for serving static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -128,7 +128,7 @@ STATICFILES_DIRS = [
 ]
 
 # Use WhiteNoise for production static serving
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ------------------------------
 # Default primary key field type
