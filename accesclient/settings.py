@@ -24,8 +24,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 CSRF_TRUSTED_ORIGINS = [
     'http://webclient.astus.fr:8090',
     'https://webclient.astus.fr:8090', 
-    'http://webclient.astus.fr',
-    'https://webclient.astus.fr',
+    'http://webacces.astus.fr',
+    'https://webacces.astus.fr',
     'http://acces-client.onrender.com:8090',
     'https://acces-client.onrender.com:8090',
     'http://acces-client.onrender.com',
