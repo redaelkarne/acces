@@ -8,391 +8,359 @@
     <title>Astreintes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* Styles copiés de stylesmesasc.css pour le sélecteur d'entretien */
-        .entretien-selector {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin: 20px 0 20px 25px; /* Adjusted margin to match search-sort */
-            max-width: 500px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
         }
 
-        .entretien-form {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: flex-start;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        .entretien-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .entretien-select {
-            padding: 10px 15px;
-            border: 2px solid #ced4da;
-            border-radius: 6px;
+        /* Modern Filters */
+        .filters-container {
             background-color: white;
-            color: #495057;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #4a90e2;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            min-width: 200px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .entretien-select:hover {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        .btn-primary {
+            background-color: #4a90e2;
+            color: white;
         }
 
-        .entretien-select:focus {
-            outline: none;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        .btn-primary:hover {
+            background-color: #357ab8;
         }
 
-        .entretien-select option {
-            padding: 8px;
-            background-color: white;
-            color: #495057;
+        .btn-secondary {
+            background-color: #e2e6ea;
+            color: #333;
         }
 
-        .entretien-select option:hover {
-            background-color: #f8f9fa;
+        .btn-secondary:hover {
+            background-color: #dbe0e5;
         }
 
-        /* Responsive design for entretien selector */
-        @media (max-width: 768px) {
-            .entretien-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .entretien-select {
-                min-width: auto;
-                width: 100%;
-            }
-            
-            .entretien-selector {
-                margin: 15px;
-                padding: 15px;
-            }
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0px;
-        }
+        /* Compact Cards */
         .astreinte-card {
-            border: 1px solid #ccc;
+            background-color: white;
+            border: 1px solid #e1e4e8;
             border-radius: 8px;
-            margin: 20px;
+            margin-bottom: 15px; /* Reduced margin */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             overflow: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #e8e8e8;
+            font-size: 0.9rem; /* Smaller base font size */
         }
         
         .card-header {
             background-color: #0066cc;
             color: white;
-            padding: 10px;
-            font-size: 1.2em;
-            text-align: center;
-        }
-        
-        .card-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #f8f8f8;
-        }
-        
-        .card-table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            vertical-align: middle;
-        }
-        
-        .card-table .priority {
-            text-align: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            background-color: #d1e7fd;
-            width: 50%;
-        }
-        
-        .card-footer {
+            padding: 8px 15px; /* Reduced padding */
+            font-weight: 600;
+            border-bottom: 1px solid #0055aa;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background-color: #e0e0e0;
-            flex-wrap: wrap;
         }
         
-        .card-footer span {
+        .card-body {
+            padding: 0;
+        }
+
+        .card-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .card-table td {
+            padding: 6px 12px; /* Reduced padding */
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+        
+        .card-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .label-col {
+            width: 100px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .priority-cell {
+            background-color: #e3f2fd;
+            color: #0d47a1;
             font-weight: bold;
-            color: #cc0000;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px 8px;
+            display: inline-block;
+        }
+        
+        .card-footer {
+            background-color: #f8f9fa;
+            padding: 4px 15px;
+            border-top: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: flex-end;
         }
         
         .action-buttons {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        .action-buttons .btn {
-            border: none;
-            background-color: transparent;
+        .action-icon {
+            color: #666;
+            font-size: 1.1em;
             cursor: pointer;
-            font-size: 1.2em;
-        }
-        
-        .btn-edit {
-            color: #4caf50;
-        }
-        
-        .btn-delete {
-            color: #f44336;
-        }
-        
-        .btn-copy {
-            color: #2196f3;
-        }
-        .search-sort {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            margin-left: 25px;
-            flex-wrap: wrap;
-        }
-        .search-sort input {
-            padding: 8px;
-            font-size: 14px;
-            width: 70%;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-        }
-        .search-sort select {
-            padding: 8px;
-            font-size: 14px;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-        }
-        .search-sort button {
-            padding: 8px 12px;
-            font-size: 14px;
-            background-color: #4a90e2;
-            color: white;
+            transition: color 0.2s;
+            background: none;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 0;
         }
-        .search-sort button:hover {
-            background-color: #357ab8;
+        
+        .action-icon:hover {
+            color: #333;
         }
+
+        .action-icon.edit:hover { color: #4caf50; }
+        .action-icon.delete:hover { color: #f44336; }
+        .action-icon.copy:hover { color: #2196f3; }
+
+        .contact-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f0f2f5;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 5px;
+            margin-bottom: 2px;
+            font-size: 0.85em;
+        }
+
         .contact-number {
-            background-color: green;
+            background-color: #4caf50;
             color: white;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 12px;
+            font-size: 10px;
             margin-right: 5px;
         }
-        /* Make the whole date input clickable to show the picker */
-        input[type="date"] {
-            position: relative;
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
         }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            color: transparent;
-            background: transparent;
+        
+        .header-action-icon {
+            color: rgba(255,255,255,0.85);
+            font-size: 1em;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: none;
+            transition: all 0.2s;
         }
-        @media (max-width: 600px) {
-            .card-header {
-                font-size: 1em;
-            }
-            .card-table td {
-                padding: 8px;
-            }
-            .priority {
-                font-size: 1.2em;
-            }
-            .card-footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .action-buttons {
-                justify-content: center;
-            }
-            .search-sort input,
-            .search-sort select {
-                width: 100%;
-            }
-            .search-sort {
+        
+        .header-action-icon:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filters-container {
                 flex-direction: column;
                 align-items: stretch;
             }
-            .astreinte-card {
-                margin: 10px;
+            .main-filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .card-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .label-col {
+                font-weight: bold;
+                margin-bottom: 2px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Search and Sort Section -->
-        <div class="search-sort">
-            <form method="GET" action="{% url 'view_astreintes' %}" style="width: 100%; display: flex; gap: 10px;">
-                <input type="text" name="q" placeholder="Rechercher..." value="{{ search_query }}">
-                <input type="date" name="filter_date" value="{{ filter_date }}" onclick="this.showPicker()">
-                <select name="sort">
-                    <option value="date_debut" {% if sort_order == 'date_debut' %}selected{% endif %}>Trier par date début</option>
-                    <option value="date_fin" {% if sort_order == 'date_fin' %}selected{% endif %}>Trier par date fin</option>
-                    <option value="priorite" {% if sort_order == 'priorite' %}selected{% endif %}>Trier par priorité</option>
+        <!-- Modern Filters Section -->
+        <div class="filters-container">
+            <form method="GET" action="{% url 'view_astreintes' %}" class="main-filter-form">
+                <input type="text" name="q" placeholder="Rechercher..." value="{{ search_query }}" class="form-control" style="flex: 2;">
+                <input type="date" name="filter_date" value="{{ filter_date }}" onclick="this.showPicker()" class="form-control" style="flex: 1;">
+                <select name="sort" class="form-control" style="flex: 1;">
+                    <option value="date_debut" {% if sort_order == 'date_debut' %}selected{% endif %}>Date début</option>
+                    <option value="date_fin" {% if sort_order == 'date_fin' %}selected{% endif %}>Date fin</option>
+                    <option value="priorite" {% if sort_order == 'priorite' %}selected{% endif %}>Priorité</option>
                 </select>
-                <!-- Hidden input to preserve selected entretien when searching/sorting -->
-                {% if selected_entretien %}
-                    <input type="hidden" name="entretien" value="{{ selected_entretien }}">
-                {% endif %}
-                <button type="submit">Appliquer</button>
-            </form>
-            
-            <a href="/upload-excel/">
-                <button style="margin-top: 10px;">Importer des astreintes</button>
-            </a>
-            
-            <button type="button" onclick="location.reload();" style="margin-top: 10px; float: right;">Rafraîchir</button>
-        </div>
-
-        {% if available_entretiens|length > 1 %}
-        <div class="entretien-selector">
-            <form method="GET" action="" class="entretien-form">
-                <!-- Preserve search and sort filters -->
-                <input type="hidden" name="q" value="{{ search_query }}">
-                <input type="hidden" name="filter_date" value="{{ filter_date }}">
-                <input type="hidden" name="sort" value="{{ sort_order }}">
                 
-                <label for="entretien" class="entretien-label">Sélectionner l'entretien:</label>
-                <select name="entretien" id="entretien" class="entretien-select" onchange="this.form.submit()">
-                    <option value="">--Sélectionner un entretien--</option>
+                {% if available_entretiens|length > 1 %}
+                <select name="entretien" class="form-control" onchange="this.form.submit()" style="flex: 1;">
+                    <option value="">-- Tous les entretiens --</option>
                     {% for entretien in available_entretiens %}
                         <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
                     {% endfor %}
                 </select>
+                {% endif %}
+                
+                <button type="submit" class="btn btn-primary">Appliquer</button>
             </form>
+            
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'manage_technicians' %}" class="btn btn-secondary" title="Gérer le répertoire">
+                    <i class="fas fa-address-book"></i> Répertoire
+                </a>
+                <a href="/upload-excel/" class="btn btn-secondary">Importer</a>
+                <button type="button" onclick="location.reload();" class="btn btn-secondary">Rafraîchir</button>
+            </div>
         </div>
-        {% endif %}
 
-        <!-- Astreintes Cards -->
+        <!-- Compact Astreintes Cards -->
         {% for astreinte in astreintes %}
         <div class="astreinte-card">
             <div class="card-header">
-                <span>{{ astreinte.entretien }}</span>
-            </div>
-            <table class="card-table">
-                <tr>
-                    <td><strong>Début:</strong></td>
-                    <td>{{ astreinte.date_debut|date:"d/m/Y H:i" }}</td>
-                    <td rowspan="3"><strong>Détails:</strong></td>
-                    <td rowspan="3" class="priority">{{ astreinte.detail_astreinte }}</td>
-                    <td rowspan="3"><strong>Informations:</strong> <br>
-                        {% if astreinte.id_astreinte %} N° astreinte: {{ astreinte.id_astreinte }}{% endif %}<br>
-                        {% if astreinte.date_import %} Date de création: {{ astreinte.date_import }}{% endif %}<br>
-                        {% if astreinte.operator_create %} Créé par: {{ astreinte.operator_create }}{% endif %}<br>
-                        {% if astreinte.operator_update %} Modifié par: {{ astreinte.operator_update }}{% endif %}<br>
-                        {% if astreinte.date_last_update %} Modifiée le: {{ astreinte.date_last_update }}{% endif %}<br>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Fin:</strong></td>
-                    <td>{{ astreinte.date_fin|date:"d/m/Y H:i"}}</td>
-                </tr>
-                <tr>
-                    <td><strong>Niveau de priorité</strong></td>
-                    <td colspan="1" style="text-align: center;"><strong>{{ astreinte.priorite}}</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>Contacts:</strong></td>
-                    <td colspan="4">
-                        {% if astreinte.type1 %}
-                            <span class="contact-number">1</span> {% if astreinte.type1|is_phone %}
-                            <i class="fas fa-phone" style="color: blue;"></i> {{ astreinte.media1 }}
-                            {% elif astreinte.type1|is_email %}
-                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media1 }}
-                            {% else %}
-                            <i class="fas fa-info-circle" style="color: gray;"></i> {{ astreinte.media1 }}
-                            {% endif %}
-                        {% endif %}
-                        
-                        {% if astreinte.type2 and astreinte.media2 %}
-                            | <span class="contact-number">2</span> {% if astreinte.type2|is_phone %}
-                            <i class="fas fa-phone" style="color: blue;"></i> {{ astreinte.media2 }}
-                            {% elif astreinte.type2|is_email %}
-                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media2 }}
-                            {% else %}
-                            <i class="fas fa-info-circle" style="color: gray;"></i> {{ astreinte.media2 }}
-                            {% endif %}
-                        {% endif %}
-                        
-                          {% if astreinte.type3 and astreinte.media3 %}
-                            | <span class="contact-number">3</span> {% if astreinte.type3|is_phone %}
-                            <i class="fas fa-phone" style="color: blue;"></i> {{ astreinte.media3 }}
-                            {% elif astreinte.type3|is_email %}
-                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media3 }}
-                            {% else %}
-                            <i class="fas fa-info-circle" style="color: gray;"></i> {{ astreinte.media3 }}
-                            {% endif %}
-                        {% endif %}
-                        
-                        {% if astreinte.type4 and astreinte.media4 %}
-                            | <span class="contact-number">4</span> {% if astreinte.type4|is_phone %}
-                            <i class="fas fa-phone" style="color: blue;"></i> {{ astreinte.media4 }}
-                            {% elif astreinte.type4|is_email %}
-                            <i class="fas fa-envelope" style="color: blue;"></i> {{ astreinte.media4 }}
-                            {% else %}
-                            <i class="fas fa-info-circle" style="color: gray;"></i> {{ astreinte.media4 }}
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-       
-            <div class="card-footer">
-                <div class="action-buttons">
-                    <a href="{% url 'modify_astreinte' astreinte.id_astreinte %}" class="btn btn-edit">
-                        <i class="fas fa-edit" style="color: green;"></i>
+                <div>
+                    <span>{{ astreinte.entretien }}</span>
+                    <span style="font-size: 0.85em; color: rgba(255,255,255,0.9); margin-left: 8px;">N° {{ astreinte.id_astreinte }}</span>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'modify_astreinte' astreinte.id_astreinte %}" class="header-action-icon" title="Modifier">
+                        <i class="fas fa-edit"></i>
                     </a>
-                    <button class="btn btn-copy">
-                        <i class="fas fa-copy" style="color: blue;"></i>
+                    <button class="header-action-icon" title="Copier">
+                        <i class="fas fa-copy"></i>
                     </button>
-                    <a href="{% url 'create_astreinte' %}" class="btn btn-edit">
-                        <i class="fas fa-plus" style="color:black;"></i>
+                    <a href="{% url 'create_astreinte' %}" class="header-action-icon" title="Ajouter">
+                        <i class="fas fa-plus"></i>
                     </a>
-                    
-                    <a href="#" class="btn btn-delete" onclick="if(confirm('Attention : La suppression de cette astreinte est irréversible. Voulez-vous continuer ?')) { window.location.href='{% url 'delete_astreinte' id_astreinte=astreinte.id_astreinte %}'; }">
-                        <i class="fas fa-trash" style="color: red;"></i>
+                    <a href="#" class="header-action-icon" title="Supprimer" onclick="if(confirm('Attention : La suppression de cette astreinte est irréversible. Voulez-vous continuer ?')) { window.location.href='{% url 'delete_astreinte' id_astreinte=astreinte.id_astreinte %}'; }">
+                        <i class="fas fa-trash"></i>
                     </a>
                 </div>
+            </div>
+            <div class="card-body">
+                <table class="card-table">
+                    <tr>
+                        <td class="label-col">Période</td>
+                        <td>
+                            {{ astreinte.date_debut|date:"d/m/Y H:i" }} <i class="fas fa-arrow-right" style="font-size: 0.8em; margin: 0 5px; color: #999;"></i> {{ astreinte.date_fin|date:"d/m/Y H:i"}}
+                        </td>
+                        <td class="label-col">Infos</td>
+                        <td style="font-size: 0.8em; color: #666; line-height: 1.1;">
+                            {% if astreinte.operator_create %}Créé: {{ astreinte.operator_create }}{% endif %}
+                            {% if astreinte.date_import %} le {{ astreinte.date_import }}{% endif %}
+                            {% if astreinte.operator_update %}<br>Modif: {{ astreinte.operator_update }}{% endif %}
+                            {% if astreinte.date_last_update %} le {{ astreinte.date_last_update }}{% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Priorité</td>
+                        <td colspan="3"><span class="priority-cell">{{ astreinte.priorite}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Détails</td>
+                        <td colspan="3">{{ astreinte.detail_astreinte }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Contacts</td>
+                        <td colspan="3">
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            {% if astreinte.type1 %}
+                                <span class="contact-badge">
+                                    <span class="contact-number">1</span>
+                                    {% if astreinte.type1|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type1|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {{ astreinte.media1 }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if astreinte.type2 and astreinte.media2 %}
+                                <span class="contact-badge">
+                                    <span class="contact-number">2</span>
+                                    {% if astreinte.type2|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type2|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {{ astreinte.media2 }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if astreinte.type3 and astreinte.media3 %}
+                                <span class="contact-badge">
+                                    <span class="contact-number">3</span>
+                                    {% if astreinte.type3|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type3|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {{ astreinte.media3 }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if astreinte.type4 and astreinte.media4 %}
+                                <span class="contact-badge">
+                                    <span class="contact-number">4</span>
+                                    {% if astreinte.type4|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type4|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {{ astreinte.media4 }}
+                                </span>
+                            {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
         {% endfor %}

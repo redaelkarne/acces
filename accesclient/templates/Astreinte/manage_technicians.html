@@ -1,120 +1,245 @@
+{% include 'navbar.html' %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Techniciens</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* Same CSS as before */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f4f7f6;
             color: #333;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e1e4e8;
+        }
+
+        .table-container {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            white-space: nowrap;
         }
 
-        th, td {
-            padding: 14px;
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            padding: 12px 15px;
             text-align: left;
-            border: 1px solid #ddd;
+            border-bottom: 2px solid #e9ecef;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Input Styles */
         td input {
-            width: 90%;
-            padding: 6px;
-            border: 1px solid #ccc;
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
 
-        button {
-            padding: 8px 12px;
-            margin: 2px;
-            cursor: pointer;
+        td input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
             border: none;
             border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            gap: 5px;
         }
 
         .btn-save {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #e3f2fd;
+            color: #0d47a1;
         }
 
         .btn-save:hover {
-            background-color: #45a049;
+            background-color: #bbdefb;
+            color: #06357a;
         }
 
         .btn-delete {
-            background-color: #f44336;
-            color: white;
+            background-color: #ffebee;
+            color: #c62828;
         }
 
         .btn-delete:hover {
-            background-color: #d32f2f;
+            background-color: #ffcdd2;
+            color: #b71c1c;
+        }
+
+        .btn-add {
+            background-color: #4a90e2;
+            color: white;
+            padding: 8px 16px;
+        }
+
+        .btn-add:hover {
+            background-color: #357ab8;
+        }
+
+        /* Message Alert */
+        #message {
+            margin-bottom: 20px;
+        }
+        
+        #message div {
+            padding: 10px 15px;
+            border-radius: 4px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* New Row Styling */
+        #addRow {
+            background-color: #f8f9fa;
+        }
+
+        #addRow td {
+            padding-top: 15px;
+            padding-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <h1>Gestion des Techniciens</h1>
-    <div id="message"></div>
-    <table>
-        <thead>
-            <tr>
-                <th>Client</th>
-                <th>Nom Technicien</th>
-                <th>Type1</th>
-                <th>Media1</th>
-                <th>Type2</th>
-                <th>Media2</th>
-                <th>Type3</th>
-                <th>Media3</th>
-                <th>Type4</th>
-                <th>Media4</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="technicianTableBody">
-            {% for technician in technicians %}
-            <tr data-id="{{ technician.id_repertoire }}">
-                <td><input type="text" value="{{ technician.client }}"></td>
-                <td><input type="text" value="{{ technician.nom_technicien }}"></td>
-                <td><input type="text" value="{{ technician.type1 }}"></td>
-                <td><input type="text" value="{{ technician.media1 }}"></td>
-                <td><input type="text" value="{{ technician.type2 }}"></td>
-                <td><input type="text" value="{{ technician.media2 }}"></td>
-                <td><input type="text" value="{{ technician.type3 }}"></td>
-                <td><input type="text" value="{{ technician.media3 }}"></td>
-                <td><input type="text" value="{{ technician.type4 }}"></td>
-                <td><input type="text" value="{{ technician.media4 }}"></td>
-                <td>
-                    <button class="btn-save" onclick="saveTechnician({{ technician.id_repertoire }})">Enregistrer</button>
-                    <button class="btn-delete" onclick="deleteTechnician({{ technician.id_repertoire }})">Supprimer</button>
-                </td>
-            </tr>
-            {% endfor %}
-            <tr id="addRow">
-                <td>
-                    <input type="text" id="newClient" name="newClient" placeholder="Client" value="{{ user.username }}">
-                </td>
-                <td><input type="text" id="newNomTechnicien" placeholder="Nom Technicien"></td>
-                <td><input type="text" id="newType1" placeholder="Type1"></td>
-                <td><input type="text" id="newMedia1" placeholder="Media1"></td>
-                <td><input type="text" id="newType2" placeholder="Type2"></td>
-                <td><input type="text" id="newMedia2" placeholder="Media2"></td>
-                <td><input type="text" id="newType3" placeholder="Type3"></td>
-                <td><input type="text" id="newMedia3" placeholder="Media3"></td>
-                <td><input type="text" id="newType4" placeholder="Type4"></td>
-                <td><input type="text" id="newMedia4" placeholder="Media4"></td>
-                <td>
-                    <button class="btn-save" onclick="addTechnician()">Ajouter</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-users-cog" style="margin-right: 10px; color: #4a90e2;"></i>Gestion des Techniciens</h1>
+        </div>
+        
+        <div id="message"></div>
+        
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Client</th>
+                            <th style="width: 15%;">Nom Technicien</th>
+                            <th style="width: 8%;">Type 1</th>
+                            <th style="width: 10%;">Média 1</th>
+                            <th style="width: 8%;">Type 2</th>
+                            <th style="width: 10%;">Média 2</th>
+                            <th style="width: 8%;">Type 3</th>
+                            <th style="width: 10%;">Média 3</th>
+                            <th style="width: 8%;">Type 4</th>
+                            <th style="width: 10%;">Média 4</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="technicianTableBody">
+                        {% for technician in technicians %}
+                        <tr data-id="{{ technician.id_repertoire }}">
+                            <td><input type="text" value="{{ technician.client }}"></td>
+                            <td><input type="text" value="{{ technician.nom_technicien }}"></td>
+                            <td><input type="text" value="{{ technician.type1 }}"></td>
+                            <td><input type="text" value="{{ technician.media1 }}"></td>
+                            <td><input type="text" value="{{ technician.type2 }}"></td>
+                            <td><input type="text" value="{{ technician.media2 }}"></td>
+                            <td><input type="text" value="{{ technician.type3 }}"></td>
+                            <td><input type="text" value="{{ technician.media3 }}"></td>
+                            <td><input type="text" value="{{ technician.type4 }}"></td>
+                            <td><input type="text" value="{{ technician.media4 }}"></td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="btn btn-save" onclick="saveTechnician({{ technician.id_repertoire }})" title="Enregistrer">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="btn btn-delete" onclick="deleteTechnician({{ technician.id_repertoire }})" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="addRow">
+                            <td>
+                                <input type="text" id="newClient" name="newClient" placeholder="Client" value="{{ user.username }}">
+                            </td>
+                            <td><input type="text" id="newNomTechnicien" placeholder="Nom Technicien"></td>
+                            <td><input type="text" id="newType1" placeholder="Type1"></td>
+                            <td><input type="text" id="newMedia1" placeholder="Media1"></td>
+                            <td><input type="text" id="newType2" placeholder="Type2"></td>
+                            <td><input type="text" id="newMedia2" placeholder="Media2"></td>
+                            <td><input type="text" id="newType3" placeholder="Type3"></td>
+                            <td><input type="text" id="newMedia3" placeholder="Media3"></td>
+                            <td><input type="text" id="newType4" placeholder="Type4"></td>
+                            <td><input type="text" id="newMedia4" placeholder="Media4"></td>
+                            <td>
+                                <button class="btn btn-add" onclick="addTechnician()">
+                                    <i class="fas fa-plus"></i> Ajouter
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
         const csrfToken = "{{ csrf_token }}";
@@ -170,8 +295,14 @@
                         <td><input type="text" value="${data.technician.type4}"></td>
                         <td><input type="text" value="${data.technician.media4}"></td>
                         <td>
-                            <button class="btn-save" onclick="saveTechnician(${data.technician.id_repertoire})">Enregistrer</button>
-                            <button class="btn-delete" onclick="deleteTechnician(${data.technician.id_repertoire})">Supprimer</button>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn btn-save" onclick="saveTechnician(${data.technician.id_repertoire})" title="Enregistrer">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteTechnician(${data.technician.id_repertoire})" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     `;
                     tbody.insertBefore(newRow, document.getElementById('addRow'));

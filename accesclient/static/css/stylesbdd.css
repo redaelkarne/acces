@@ -40,13 +40,13 @@ table {
 
 th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 1px;
     text-align: center;
     white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
 }
 
 th {
-    padding: 8px; /* Removed redundant border and padding */
+    padding: 4px; /* Removed redundant border and padding */
 }
 
 /* Specific table cell styles */

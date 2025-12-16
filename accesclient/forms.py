@@ -3,6 +3,7 @@ import re
 import pandas as pd
 from django import forms
 from datetime import datetime
+from django.utils import timezone
 from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -131,7 +132,7 @@ class AstreinteForm(forms.ModelForm):
     technician = forms.ModelChoiceField(
         queryset=Repertoire.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
-        required=True,
+        required=False,
         label="Repertoire"
     )       
     class Meta:
@@ -146,6 +147,16 @@ class AstreinteForm(forms.ModelForm):
         user = kwargs.pop('user', None)  # Safely get user from kwargs
         super().__init__(*args, **kwargs)
 
+        if self.instance and self.instance.pk:
+            if self.instance.date_debut:
+                local_dt = timezone.localtime(self.instance.date_debut)
+                self.initial['date_debut'] = local_dt.strftime('%Y-%m-%d')
+                self.initial['heure_debut'] = local_dt.strftime('%H:%M')
+            if self.instance.date_fin:
+                local_dt = timezone.localtime(self.instance.date_fin)
+                self.initial['date_fin'] = local_dt.strftime('%Y-%m-%d')
+                self.initial['heure_fin'] = local_dt.strftime('%H:%M')
+
         if user:
             # Filter technicians based on the logged-in user's client
             filtered_technicians = Repertoire.objects.filter(client=user.username)
@@ -154,6 +165,20 @@ class AstreinteForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        
+        # Combine date and time for date_debut
+        date_debut = cleaned_data.get('date_debut')
+        heure_debut = cleaned_data.get('heure_debut')
+        if date_debut and heure_debut:
+            dt = datetime.combine(date_debut, heure_debut)
+            cleaned_data['date_debut'] = timezone.make_aware(dt)
+            
+        # Combine date and time for date_fin
+        date_fin = cleaned_data.get('date_fin')
+        heure_fin = cleaned_data.get('heure_fin')
+        if date_fin and heure_fin:
+            dt = datetime.combine(date_fin, heure_fin)
+            cleaned_data['date_fin'] = timezone.make_aware(dt)
 
         
         for i in range(1, 5):

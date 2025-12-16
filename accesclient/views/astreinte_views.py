@@ -164,7 +164,7 @@ def modify_astreinte(request, id_astreinte):
     astreinte = get_object_or_404(Astreinte, id_astreinte=id_astreinte)
 
     if request.method == 'POST':
-        form = AstreinteForm(request.POST, instance=astreinte)
+        form = AstreinteForm(request.POST, instance=astreinte, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "L'astreinte a été modifiée avec succès.")
@@ -172,6 +172,6 @@ def modify_astreinte(request, id_astreinte):
         else:
             messages.error(request, "Veuillez corriger les erreurs du formulaire.")
     else:
-        form = AstreinteForm(instance=astreinte)
+        form = AstreinteForm(instance=astreinte, user=request.user)
 
     return render(request, 'Astreinte/modify_astreinte.html', {'form': form, 'astreinte': astreinte})
