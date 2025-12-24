@@ -17,7 +17,7 @@
 
         /* Main container styles */
         .form-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 30px;
             background: #fff;
@@ -36,12 +36,23 @@
             padding-bottom: 15px;
             font-weight: 600;
         }
-        
-        /* Form group styling */
-        .form-container form p {
-            margin-bottom: 20px;
+
+        /* Grid layout for form fields */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-grid p {
+            margin-bottom: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Full width elements */
+        .full-width {
+            grid-column: 1 / -1;
         }
         
         /* Label styling */
@@ -94,13 +105,14 @@
         /* Textarea styling */
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
         
         /* Button container */
         .btn-container {
             text-align: center;
             margin-top: 25px;
+            grid-column: 1 / -1;
         }
         
         /* Submit button styling */
@@ -115,6 +127,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
             width: 100%;
+            max-width: 200px;
         }
         
         button[type="submit"]:hover {
@@ -123,15 +136,6 @@
         
         button[type="submit"]:active {
             transform: translateY(1px);
-        }
-        
-        /* Media pairs styling */
-        .form-container form p:has(select[name*="type"]) {
-            margin-bottom: 10px;
-        }
-        
-        .form-container form p:has(input[name*="media"]) {
-            margin-bottom: 25px;
         }
         
         /* Error message styling */
@@ -150,8 +154,16 @@
                 padding: 20px;
             }
             
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .form-container h2 {
                 font-size: 1.4rem;
+            }
+            
+            button[type="submit"] {
+                max-width: 100%;
             }
         }
     </style>
@@ -159,9 +171,23 @@
 <body>
     <div class="form-container">
         <h2><i class="fas fa-plus-circle" style="color: #4a90e2; margin-right: 10px;"></i>Créer une nouvelle astreinte</h2>
-        <form method="POST">
+        <form method="POST" class="form-grid">
             {% csrf_token %}
-            {{ form.as_p }}
+            
+            {% for field in form %}
+                <p class="{% if field.name == 'detail_astreinte' or field.name == 'technician' %}full-width{% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </p>
+            {% endfor %}
+
             <div class="btn-container">
                 <button type="submit">Envoyer</button>
             </div>

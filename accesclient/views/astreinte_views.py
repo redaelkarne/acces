@@ -109,8 +109,9 @@ def view_astreintes(request):
     # Check if user is applying any specific search or date filter
     has_search_filter = bool(search_query)
     has_date_filter = bool(filter_date)
+    view_all = request.GET.get('view_all') == 'true'
 
-    if not has_search_filter and not has_date_filter:
+    if not has_search_filter and not has_date_filter and not view_all:
         # Default view: Show currently active astreintes (by day and hour)
         now = timezone.now()
         filters &= Q(date_debut__lte=now) & Q(date_fin__gte=now)
@@ -150,6 +151,7 @@ def view_astreintes(request):
         'filter_date': filter_date,
         'selected_entretien': selected_entretien,
         'available_entretiens': available_entretiens,
+        'view_all': view_all,
     })
 
 

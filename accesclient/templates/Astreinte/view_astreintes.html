@@ -247,14 +247,6 @@
         <!-- Modern Filters Section -->
         <div class="filters-container">
             <form method="GET" action="{% url 'view_astreintes' %}" class="main-filter-form">
-                <input type="text" name="q" placeholder="Rechercher..." value="{{ search_query }}" class="form-control" style="flex: 2;">
-                <input type="date" name="filter_date" value="{{ filter_date }}" onclick="this.showPicker()" class="form-control" style="flex: 1;">
-                <select name="sort" class="form-control" style="flex: 1;">
-                    <option value="date_debut" {% if sort_order == 'date_debut' %}selected{% endif %}>Date début</option>
-                    <option value="date_fin" {% if sort_order == 'date_fin' %}selected{% endif %}>Date fin</option>
-                    <option value="priorite" {% if sort_order == 'priorite' %}selected{% endif %}>Priorité</option>
-                </select>
-                
                 {% if available_entretiens|length > 1 %}
                 <select name="entretien" class="form-control" onchange="this.form.submit()" style="flex: 1;">
                     <option value="">-- Tous les entretiens --</option>
@@ -263,7 +255,20 @@
                     {% endfor %}
                 </select>
                 {% endif %}
+
+                <input type="text" name="q" placeholder="Rechercher..." value="{{ search_query }}" class="form-control" style="flex: 2;">
+                <input type="date" name="filter_date" value="{{ filter_date }}" onclick="this.showPicker()" class="form-control" style="flex: 1;">
+                <select name="sort" class="form-control" style="flex: 1;">
+                    <option value="date_debut" {% if sort_order == 'date_debut' %}selected{% endif %}>Date début</option>
+                    <option value="date_fin" {% if sort_order == 'date_fin' %}selected{% endif %}>Date fin</option>
+                    <option value="priorite" {% if sort_order == 'priorite' %}selected{% endif %}>Priorité</option>
+                </select>
                 
+                <div style="display: flex; align-items: center; padding: 0 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #ddd; height: 35px;">
+                    <input type="checkbox" id="view_all" name="view_all" value="true" {% if view_all %}checked{% endif %} onchange="this.form.submit()" style="margin-right: 8px; cursor: pointer;">
+                    <label for="view_all" style="font-size: 14px; cursor: pointer; margin: 0; user-select: none;">Tout voir</label>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Appliquer</button>
             </form>
             

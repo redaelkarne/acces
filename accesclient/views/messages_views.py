@@ -193,6 +193,15 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             if selected_entretien and messages_list:
                 messages_list = messages_list.filter(entretien=selected_entretien)
 
+        # Search functionality
+        search_query = request.GET.get('search', '')
+        if search_query and messages_list:
+            search_filter = Q()
+            for field in ArchiveMessagesAscenseurs._meta.fields:
+                # Use icontains for all fields
+                search_filter |= Q(**{f"{field.name}__icontains": search_query})
+            messages_list = messages_list.filter(search_filter)
+
         # Pagination
         paginator = Paginator(messages_list, 150)  # Show 150 messages per page
         page_number = request.GET.get('page')
@@ -243,6 +252,7 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'end_date': end_date_str,
             'entretiens': entretiens,
             'selected_entretien': selected_entretien,
+            'search_query': search_query,
         })
 
     def export_to_csv(self, messages_list, selected_columns):
