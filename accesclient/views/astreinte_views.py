@@ -5,12 +5,14 @@ from django.db.models import Q, Case, When, Value, BooleanField
 from django.contrib import messages
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 import json
 import os
 from django.conf import settings
 
-from ..models import Astreinte, Appareil
-from ..forms import AstreinteForm, ExcelUploadForm, process_excel_file
+from ..models import Astreinte, Appareil, Alerte
+from ..forms import AstreinteForm, ExcelUploadForm, process_excel_file, AlerteForm
 
 
 def create_astreinte(request):
@@ -177,3 +179,236 @@ def modify_astreinte(request, id_astreinte):
         form = AstreinteForm(instance=astreinte, user=request.user)
 
     return render(request, 'Astreinte/modify_astreinte.html', {'form': form, 'astreinte': astreinte})
+
+
+# ============ ALERTES MANAGEMENT ============
+
+def list_alertes(request):
+    """Liste toutes les alertes configurées"""
+    user = request.user
+    
+    # Get delegated users dynamically from Appareil model based on user type
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        # User exists as Client - get all distinct entretiens from Appareil
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        
+        # Remove None values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_users = [user.username] + delegated_users
+    else:
+        # User doesn't exist as Client - only use user.first_name
+        accessible_users = [user.first_name]
+
+    # Load additional access from JSON config
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    # Build filter for agence field (same logic as entretien in astreintes)
+    prefix_filters = Q()
+    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
+        # Single user case - use exact match instead of startswith
+        prefix_filters = Q(agence=user.first_name)
+    else:
+        # Multiple users case - use startswith logic
+        for username in accessible_users:
+            prefix_filters |= Q(agence__startswith=username)
+    
+    alertes = Alerte.objects.filter(prefix_filters).order_by('jour', 'heure')
+    
+    return render(request, 'Astreinte/manage_alertes.html', {
+        'alertes': alertes,
+        'accessible_users': accessible_users,
+    })
+
+
+@require_http_methods(["GET"])
+def get_alertes_json(request):
+    """Retourne les alertes au format JSON pour l'affichage dans le modal"""
+    user = request.user
+    
+    # Get delegated users dynamically from Appareil model based on user type
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        # User exists as Client - get all distinct entretiens from Appareil
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        
+        # Remove None values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_users = [user.username] + delegated_users
+    else:
+        # User doesn't exist as Client - only use user.first_name
+        accessible_users = [user.first_name]
+
+    # Load additional access from JSON config
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    # Build filter for agence field (same logic as entretien in astreintes)
+    prefix_filters = Q()
+    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
+        # Single user case - use exact match instead of startswith
+        prefix_filters = Q(agence=user.first_name)
+    else:
+        # Multiple users case - use startswith logic
+        for username in accessible_users:
+            prefix_filters |= Q(agence__startswith=username)
+    
+    alertes = Alerte.objects.filter(prefix_filters).order_by('jour', 'heure')
+    alertes_data = [{
+        'id': alerte.id_alerte,
+        'jour': alerte.jour,
+        'jour_display': alerte.get_jour_display(),
+        'heure': alerte.heure,
+        'email': alerte.email,
+        'agence': alerte.agence,
+        'date_surveiller': alerte.date_surveiller,
+    } for alerte in alertes]
+    
+    return JsonResponse({'alertes': alertes_data})
+
+
+@require_http_methods(["POST"])
+def create_alerte(request):
+    """Crée une nouvelle alerte"""
+    data = json.loads(request.body)
+    form = AlerteForm(data)
+    
+    if form.is_valid():
+        alerte = form.save()
+        return JsonResponse({
+            'success': True,
+            'message': 'Alerte créée avec succès',
+            'alerte': {
+                'id': alerte.id_alerte,
+                'jour': alerte.jour,
+                'jour_display': alerte.get_jour_display(),
+                'heure': alerte.heure,
+                'email': alerte.email,
+                'agence': alerte.agence,
+                'date_surveiller': alerte.date_surveiller,
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        }, status=400)
+
+
+@require_http_methods(["POST"])
+def update_alerte(request, id_alerte):
+    """Modifie une alerte existante"""
+    user = request.user
+    
+    # Get accessible users
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_users = [user.username] + delegated_users
+    else:
+        accessible_users = [user.first_name]
+
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    # Build filter
+    prefix_filters = Q()
+    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
+        prefix_filters = Q(agence=user.first_name)
+    else:
+        for username in accessible_users:
+            prefix_filters |= Q(agence__startswith=username)
+    
+    # Get alerte with access check
+    alerte = get_object_or_404(Alerte, Q(id_alerte=id_alerte) & prefix_filters)
+    data = json.loads(request.body)
+    form = AlerteForm(data, instance=alerte)
+    
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            'success': True,
+            'message': 'Alerte modifiée avec succès',
+            'alerte': {
+                'id': alerte.id_alerte,
+                'jour': alerte.jour,
+                'jour_display': alerte.get_jour_display(),
+                'heure': alerte.heure,
+                'email': alerte.email,
+                'agence': alerte.agence,
+                'date_surveiller': alerte.date_surveiller,
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        }, status=400)
+
+
+@require_http_methods(["DELETE"])
+def delete_alerte(request, id_alerte):
+    """Supprime une alerte"""
+    user = request.user
+    
+    # Get accessible users
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_users = [user.username] + delegated_users
+    else:
+        accessible_users = [user.first_name]
+
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    # Build filter
+    prefix_filters = Q()
+    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
+        prefix_filters = Q(agence=user.first_name)
+    else:
+        for username in accessible_users:
+            prefix_filters |= Q(agence__startswith=username)
+    
+    # Get alerte with access check
+    alerte = get_object_or_404(Alerte, Q(id_alerte=id_alerte) & prefix_filters)
+    alerte.delete()
+    return JsonResponse({
+        'success': True,
+        'message': 'Alerte supprimée avec succès'
+    })

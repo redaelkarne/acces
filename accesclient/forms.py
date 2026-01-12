@@ -4,7 +4,7 @@ import pandas as pd
 from django import forms
 from datetime import datetime
 from django.utils import timezone
-from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire
+from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire, Alerte
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import connection
@@ -333,3 +333,25 @@ class LastNameAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].label = 'Nom de famille'
+
+
+class AlerteForm(forms.ModelForm):
+    class Meta:
+        model = Alerte
+        fields = ['jour', 'heure', 'email', 'agence', 'date_surveiller']
+        widgets = {
+            'jour': forms.Select(attrs={'class': 'form-control'}),
+            'heure': forms.TextInput(attrs={'class': 'form-control', 'type': 'time', 'placeholder': 'HH:MM'}),
+            'email': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'email1@exemple.com, email2@exemple.com'}),
+            'agence': forms.TextInput(attrs={'class': 'form-control'}),
+            'date_surveiller': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].help_text = 'Séparez plusieurs emails par des virgules'
+        self.fields['date_surveiller'].help_text = 'Nombre de jours à partir de la date actuelle'
+        self.fields['jour'].required = True
+        self.fields['heure'].required = True
+        self.fields['email'].required = True
+        self.fields['agence'].required = True

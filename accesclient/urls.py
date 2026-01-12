@@ -62,4 +62,11 @@ urlpatterns = [
     path('get-technician-data/<int:technician_id>/', views.get_technician_data, name='get_technician_data'),
     path('manage-technicians/', views.ManageTechniciansView.as_view(), name='manage_technicians'),
     
+    # Alertes management
+    path('alertes/', views.list_alertes, name='list_alertes'),
+    path('api/alertes/', views.get_alertes_json, name='get_alertes_json'),
+    path('api/alertes/create/', views.create_alerte, name='create_alerte'),
+    path('api/alertes/<int:id_alerte>/update/', views.update_alerte, name='update_alerte'),
+    path('api/alertes/<int:id_alerte>/delete/', views.delete_alerte, name='delete_alerte_api'),
+    
 ]

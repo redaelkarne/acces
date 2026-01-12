@@ -8,14 +8,14 @@ class DatabaseRouter:
     def db_for_read(self, model, **hints):
         """Suggère la base de données à lire."""
         if model._meta.app_label == 'accesclient':
-            if model.__name__ in ['Astreinte', 'Repertoire']:
+            if model.__name__ in ['Astreinte', 'Repertoire', 'Alerte']:
                 return 'astreinte_db'
         return 'default'
 
     def db_for_write(self, model, **hints):
         """Suggère la base de données pour l'écriture."""
         if model._meta.app_label == 'accesclient':
-            if model.__name__ in ['Astreinte', 'Repertoire']:
+            if model.__name__ in ['Astreinte', 'Repertoire', 'Alerte']:
                 return 'astreinte_db'
         return 'default'
 
@@ -29,7 +29,7 @@ class DatabaseRouter:
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """S'assure que certains modèles sont migrés vers la bonne base de données."""
         if app_label == 'accesclient':
-            if model_name in ['astreinte', 'repertoire']:
+            if model_name in ['astreinte', 'repertoire', 'alerte']:
                 return db == 'astreinte_db'
             else:
                 return db == 'default'

@@ -242,3 +242,35 @@ class Repertoire(models.Model):
         db_table = 'repertoire'
         verbose_name_plural = 'Repertoires'
         app_label = 'accesclient'
+
+
+class Alerte(models.Model):
+    JOURS_CHOICES = [
+        (1, 'Dimanche'),
+        (2, 'Lundi'),
+        (3, 'Mardi'),
+        (4, 'Mercredi'),
+        (5, 'Jeudi'),
+        (6, 'Vendredi'),
+        (7, 'Samedi'),
+    ]
+    
+    id_alerte = models.AutoField(primary_key=True)
+    jour = models.IntegerField(choices=JOURS_CHOICES, default=0, verbose_name='Jour de la semaine')
+    heure = models.CharField(max_length=20, default='0', verbose_name='Heure de vérification')
+    email = models.CharField(max_length=300, default='0', verbose_name='Email(s) destinataire(s)', 
+                             help_text='Séparez plusieurs emails par des virgules')
+    agence = models.CharField(max_length=60, default='0', verbose_name='Agence')
+    date_surveiller = models.IntegerField(null=True, blank=True, verbose_name='Jours à surveiller', 
+                                          help_text='Nombre de jours à partir de la date actuelle')
+    
+    class Meta:
+        managed = False
+        db_table = 'alerte'
+        verbose_name = 'Alerte'
+        verbose_name_plural = 'Alertes'
+        ordering = ['jour', 'heure']
+        app_label = 'accesclient'
+    
+    def __str__(self):
+        return f"Alerte {self.get_jour_display()} à {self.heure} pour {self.agence}"
