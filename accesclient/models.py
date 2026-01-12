@@ -274,3 +274,31 @@ class Alerte(models.Model):
     
     def __str__(self):
         return f"Alerte {self.get_jour_display()} à {self.heure} pour {self.agence}"
+
+
+class Consigne(models.Model):
+    idConsigne = models.AutoField(primary_key=True, db_column='idConsigne')
+    Client = models.CharField(max_length=50, null=True, blank=True)
+    Activité = models.CharField(max_length=255, null=True, blank=True, verbose_name='Activité')
+    Clientèle = models.CharField(max_length=255, null=True, blank=True, verbose_name='Clientèle')
+    Contact_ASTUS = models.CharField(max_length=255, null=True, blank=True, db_column='Contact ASTUS', verbose_name='Contact ASTUS')
+    Horaire_1 = models.CharField(max_length=255, null=True, blank=True, db_column='Horaire 1', verbose_name='Horaire 1')
+    Horaire_2 = models.CharField(max_length=255, null=True, blank=True, db_column='Horaire 2', verbose_name='Horaire 2')
+    Lignes_transférées = models.CharField(max_length=255, null=True, blank=True, db_column='Lignes transférées', verbose_name='Lignes transférées')
+    Nature_ligne_transférées = models.CharField(max_length=255, null=True, blank=True, db_column='Nature ligne transférées', verbose_name='Nature ligne transférées')
+    Phrase_accueil = models.CharField(max_length=255, null=True, blank=True, db_column='Phrase d\'accueil', verbose_name='Phrase d\'accueil')
+    Type_de_gestion = models.CharField(max_length=255, null=True, blank=True, db_column='Type de gestion', verbose_name='Type de gestion')
+    Rapport_activité = models.CharField(max_length=255, null=True, blank=True, db_column='Rapport d\'activité', verbose_name='Rapport d\'activité')
+    Consignes = models.TextField(null=True, blank=True, verbose_name='Consignes')
+    Procédure_urgence = models.TextField(null=True, blank=True, db_column='Procédure d\'urgence', verbose_name='Procédure d\'urgence')
+    Discours_type = models.TextField(null=True, blank=True, db_column='Discours type', verbose_name='Discours type')
+    
+    class Meta:
+        managed = False
+        db_table = 'consignes'
+        verbose_name = 'Consigne'
+        verbose_name_plural = 'Consignes'
+        app_label = 'accesclient'
+    
+    def __str__(self):
+        return f"{self.Client}"

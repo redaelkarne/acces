@@ -1,0 +1,297 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Consignes</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 2em;
+        }
+
+        .consignes-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .consigne-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .consigne-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .consigne-header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .consigne-client {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0 0 5px 0;
+        }
+
+        .consigne-activite {
+            font-size: 1.1em;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .consigne-section {
+            margin-bottom: 15px;
+        }
+
+        .consigne-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 0.95em;
+        }
+
+        .consigne-value {
+            color: #555;
+            line-height: 1.6;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .consigne-value.long-text {
+            border-left: 3px solid #007bff;
+            padding-left: 12px;
+        }
+
+        .consigne-value.preview {
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .consigne-value.preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, #f8f9fa);
+        }
+
+        .consigne-value.expanded {
+            max-height: none;
+        }
+
+        .consigne-value.expanded::after {
+            display: none;
+        }
+
+        .toggle-button {
+            margin-top: 10px;
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-button:hover {
+            background-color: #0056b3;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .no-results h2 {
+            color: #666;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .no-results p {
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .consigne-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Consignes Clients</h1>
+
+        {% if consignes %}
+            <div class="consignes-grid">
+                {% for consigne in consignes %}
+                    <div class="consigne-card">
+                        <div class="consigne-header">
+                            <h2 class="consigne-client">{{ consigne.Client }}</h2>
+                            {% if consigne.Activité %}
+                                <div class="consigne-activite">{{ consigne.Activité }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if consigne.Clientèle %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Clientèle :</span>
+                                <div class="consigne-value">{{ consigne.Clientèle }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Contact_ASTUS %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Contact ASTUS :</span>
+                                <div class="consigne-value">{{ consigne.Contact_ASTUS }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Horaire_1 %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Horaire 1 :</span>
+                                <div class="consigne-value">{{ consigne.Horaire_1 }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Horaire_2 %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Horaire 2 :</span>
+                                <div class="consigne-value">{{ consigne.Horaire_2 }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Lignes_transférées %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Lignes transférées :</span>
+                                <div class="consigne-value">{{ consigne.Lignes_transférées }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Nature_ligne_transférées %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Nature ligne transférées :</span>
+                                <div class="consigne-value">{{ consigne.Nature_ligne_transférées }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Phrase_accueil %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Phrase d'accueil :</span>
+                                <div class="consigne-value">{{ consigne.Phrase_accueil }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Type_de_gestion %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Type de gestion :</span>
+                                <div class="consigne-value">{{ consigne.Type_de_gestion }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Rapport_activité %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Rapport d'activité :</span>
+                                <div class="consigne-value">{{ consigne.Rapport_activité }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Consignes %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Consignes :</span>
+                                <div class="consigne-value long-text preview" id="consignes-{{ consigne.idConsigne }}">{{ consigne.Consignes }}</div>
+                                <button class="toggle-button" onclick="toggleContent('consignes-{{ consigne.idConsigne }}', this)">Voir plus</button>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Procédure_urgence %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Procédure d'urgence :</span>
+                                <div class="consigne-value long-text preview" id="procedure-{{ consigne.idConsigne }}">{{ consigne.Procédure_urgence }}</div>
+                                <button class="toggle-button" onclick="toggleContent('procedure-{{ consigne.idConsigne }}', this)">Voir plus</button>
+                            </div>
+                        {% endif %}
+
+                        {% if consigne.Discours_type %}
+                            <div class="consigne-section">
+                                <span class="consigne-label">Discours type :</span>
+                                <div class="consigne-value long-text preview" id="discours-{{ consigne.idConsigne }}">{{ consigne.Discours_type }}</div>
+                                <button class="toggle-button" onclick="toggleContent('discours-{{ consigne.idConsigne }}', this)">Voir plus</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <h2>Aucune consigne trouvée</h2>
+                <p>Vous n'avez accès à aucune consigne pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleContent(elementId, button) {
+            const element = document.getElementById(elementId);
+            if (element.classList.contains('preview')) {
+                element.classList.remove('preview');
+                element.classList.add('expanded');
+                button.textContent = 'Voir moins';
+            } else {
+                element.classList.add('preview');
+                element.classList.remove('expanded');
+                button.textContent = 'Voir plus';
+            }
+        }
+    </script>
+</body>
+</html>

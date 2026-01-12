@@ -35,6 +35,8 @@ urlpatterns = [
     path('export_appareils/', export_appareils_to_excel, name='export_appareils'),
     path('appareil/<int:id>/set_perdu/', set_appareil_perdu, name='set_appareil_perdu'),
     path('appareil/<int:id>/modify_autres/', modify_autres_if_meditrax, name='modify_autres_if_meditrax'),
+    # Consignes
+    path('consignes/', views.view_consignes, name='view_consignes'),
     # Login/logout URLs - Placed before include to override default auth views
     path('accounts/login/', views.login_view, name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
