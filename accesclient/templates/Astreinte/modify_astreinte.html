@@ -139,7 +139,7 @@
             
             <div class="form-grid">
                 {% for field in form %}
-                    <div class="form-group {% if field.name == 'detail_astreinte' or field.name == 'technician' %}full-width{% endif %}">
+                    <div class="form-group {% if field.name == 'detail_astreinte' or field.name == 'technician' or field.name == 'entretien' %}full-width{% endif %}">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
                         {% if field.errors %}

@@ -21,9 +21,17 @@ class AppareilView(LoginRequiredMixin, View):
         user = request.user
 
         # 1. Liste par défaut (comportement actuel)
-        accessible_accounts = [user.first_name]
+        accessible_accounts = [user.username, user.first_name]
 
-        # 2. Tentative de chargement du JSON
+        # 2. Get delegated users from Appareil
+        if Appareil.objects.filter(Client=user.first_name).exists():
+            delegated_users = list(Appareil.objects.filter(
+                Client=user.first_name
+            ).values_list('Entretien', flat=True).distinct())
+            delegated_users = [entretien for entretien in delegated_users if entretien]
+            accessible_accounts.extend(delegated_users)
+
+        # 3. Tentative de chargement du JSON
         json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
         if os.path.exists(json_path):
             try:
@@ -35,16 +43,18 @@ class AppareilView(LoginRequiredMixin, View):
             except Exception as e:
                 print(f"Erreur lecture JSON: {e}")
 
+        # Remove duplicates
+        accessible_accounts = list(set(accessible_accounts))
+
         # Fetch Appareil records based on user type
-        
         # Check if the user exists as Client in Appareil table
         if Appareil.objects.filter(Client=user.first_name).exists():
             appareils_list = Appareil.objects.filter(Destinataire__in=accessible_accounts)
         else:
             appareils_list = Appareil.objects.filter(Entretien__in=accessible_accounts)
 
-        # Get unique "Entretien" values for the user
-        entretiens = appareils_list.values_list('Entretien', flat=True).distinct()
+        # Use accessible_accounts directly as entretiens for filter
+        entretiens = sorted(accessible_accounts)
         
         # Get the selected "Entretien" from GET parameters
         selected_entretien = request.GET.get('entretien')

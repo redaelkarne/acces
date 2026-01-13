@@ -21,7 +21,6 @@ def create_astreinte(request):
         if form.is_valid():
             astreinte = form.save(commit=False)
             astreinte.operator_create = request.user.username
-            astreinte.entretien = request.user.username
             astreinte.technician = form.cleaned_data['technician']
             astreinte.save()
             return redirect('http://127.0.0.1:8000/create-astreinte/')
@@ -86,18 +85,14 @@ def view_astreintes(request):
         except Exception as e:
             print(f"Erreur lecture JSON: {e}")
 
-    prefix_filters = Q()
-    if len(accessible_users) == 1 and accessible_users[0] == user.first_name:
-        # Single user case - use exact match instead of startswith
-        prefix_filters = Q(entretien=user.first_name)
-    else:
-        # Multiple users case - use startswith logic
-        for username in accessible_users:
-            prefix_filters |= Q(entretien__startswith=username)
+    # Remove duplicates
+    accessible_users = list(set(accessible_users))
 
-    available_entretiens = list(Astreinte.objects.filter(
-        prefix_filters
-    ).values_list('entretien', flat=True).distinct().order_by('entretien'))
+    # Use exact match for entretien field with accessible_users
+    prefix_filters = Q(entretien__in=accessible_users)
+
+    # Use accessible_users directly as available_entretiens for filter
+    available_entretiens = sorted(accessible_users)
 
     base_entretien = next((e for e in available_entretiens if e == user.username), None)
     if not selected_entretien:
@@ -170,7 +165,10 @@ def modify_astreinte(request, id_astreinte):
     if request.method == 'POST':
         form = AstreinteForm(request.POST, instance=astreinte, user=request.user)
         if form.is_valid():
-            form.save()
+            updated_astreinte = form.save(commit=False)
+            updated_astreinte.operator_update = request.user.username
+            updated_astreinte.date_last_update = timezone.now()
+            updated_astreinte.save()
             messages.success(request, "L'astreinte a été modifiée avec succès.")
             return redirect(reverse('view_astreintes'))
         else:

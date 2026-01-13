@@ -129,6 +129,11 @@ class AstreinteForm(forms.ModelForm):
     type4 = forms.ChoiceField(choices=TYPE_CHOICES, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
     media4 = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
+    entretien = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True,
+        label="Entretien"
+    )
     technician = forms.ModelChoiceField(
         queryset=Repertoire.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -138,7 +143,7 @@ class AstreinteForm(forms.ModelForm):
     class Meta:
         model = Astreinte
         fields = [
-            'date_debut', 'heure_debut', 'date_fin', 'heure_fin',
+            'entretien', 'date_debut', 'heure_debut', 'date_fin', 'heure_fin',
             'priorite', 'detail_astreinte',
             'type1', 'media1', 'type2', 'media2',
             'type3', 'media3', 'type4', 'media4'
@@ -146,6 +151,46 @@ class AstreinteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Safely get user from kwargs
         super().__init__(*args, **kwargs)
+
+        # Populate entretien choices based on user access
+        if user:
+            from django.db.models import Q
+            import os
+            import json
+            from django.conf import settings
+            
+            # Get delegated users dynamically from Appareil model based on user type
+            if Appareil.objects.filter(Client=user.first_name).exists():
+                # User exists as Client - get all distinct entretiens from Appareil
+                delegated_users = list(Appareil.objects.filter(
+                    Client=user.first_name
+                ).values_list('Entretien', flat=True).distinct())
+                
+                # Remove None values and add current user
+                delegated_users = [entretien for entretien in delegated_users if entretien]
+                accessible_users = [user.username] + delegated_users
+            else:
+                # User doesn't exist as Client - only use user.first_name
+                accessible_users = [user.first_name]
+
+            # Load additional access from JSON config
+            json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+            if os.path.exists(json_path):
+                try:
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        config = json.load(f)
+                        if user.first_name in config:
+                            accessible_users.extend(config[user.first_name])
+                except Exception as e:
+                    print(f"Erreur lecture JSON: {e}")
+
+            # Remove duplicates and sort
+            accessible_users = sorted(list(set(accessible_users)))
+
+            # Create choices directly from accessible users
+            entretien_choices = [(e, e) for e in accessible_users]
+            
+            self.fields['entretien'].choices = entretien_choices
 
         if self.instance and self.instance.pk:
             if self.instance.date_debut:

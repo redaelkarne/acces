@@ -71,4 +71,7 @@ urlpatterns = [
     path('api/alertes/<int:id_alerte>/update/', views.update_alerte, name='update_alerte'),
     path('api/alertes/<int:id_alerte>/delete/', views.delete_alerte, name='delete_alerte_api'),
     
+    # Access config management (staff only)
+    path('gestion-acces/', views.manage_access_config, name='manage_access_config'),
+    
 ]
