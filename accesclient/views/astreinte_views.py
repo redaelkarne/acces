@@ -95,11 +95,12 @@ def view_astreintes(request):
     available_entretiens = sorted(accessible_users)
 
     base_entretien = next((e for e in available_entretiens if e == user.username), None)
-    if not selected_entretien:
-        selected_entretien = base_entretien or (available_entretiens[0] if available_entretiens else None)
+    # Don't set a default selected_entretien if none is chosen
+    # This allows viewing all entretiens by default
 
     filters = prefix_filters
 
+    # Only filter by entretien if one is explicitly selected
     if selected_entretien:
         filters &= Q(entretien=selected_entretien)
 
