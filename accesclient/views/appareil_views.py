@@ -137,6 +137,8 @@ def modify_appareil(request, id):
             print(f"Erreur lecture JSON: {e}")
     
     accessible_accounts = list(set(accessible_accounts))
+    # Remove PERDU from accessible accounts
+    accessible_accounts = [acc for acc in accessible_accounts if acc != 'PERDU']
     
     # Get distinct clients for the dropdown
     if Appareil.objects.filter(Client=user.first_name).exists():
@@ -148,7 +150,7 @@ def modify_appareil(request, id):
             Entretien__in=accessible_accounts
         ).values_list('Client', flat=True).distinct()
     
-    clients = [c for c in clients if c]
+    clients = [c for c in clients if c and c != 'PERDU']
     
     # Get distinct types
     if Appareil.objects.filter(Client=user.first_name).exists():
@@ -160,7 +162,7 @@ def modify_appareil(request, id):
             Entretien__in=accessible_accounts
         ).values_list('Type', flat=True).distinct()
     
-    types = [t for t in types if t]
+    types = [t for t in types if t and t != 'PERDU']
     
     if request.method == 'POST':
         form = AppareilModificationForm(
@@ -218,6 +220,8 @@ def create_appareil(request):
             print(f"Erreur lecture JSON: {e}")
     
     accessible_accounts = list(set(accessible_accounts))
+    # Remove PERDU from accessible accounts
+    accessible_accounts = [acc for acc in accessible_accounts if acc != 'PERDU']
     
     # Get distinct clients for the dropdown
     if Appareil.objects.filter(Client=user.first_name).exists():
@@ -229,7 +233,7 @@ def create_appareil(request):
             Entretien__in=accessible_accounts
         ).values_list('Client', flat=True).distinct()
     
-    clients = [c for c in clients if c]
+    clients = [c for c in clients if c and c != 'PERDU']
     
     # Get distinct types for the user's appareils
     if Appareil.objects.filter(Client=user.first_name).exists():
@@ -241,7 +245,7 @@ def create_appareil(request):
             Entretien__in=accessible_accounts
         ).values_list('Type', flat=True).distinct()
     
-    types = [t for t in types if t]
+    types = [t for t in types if t and t != 'PERDU']
     
     if request.method == 'POST':
         form = AppareilModificationForm(
