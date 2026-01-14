@@ -78,9 +78,28 @@ class MessageForm(forms.Form):
     
 
 class AppareilModificationForm(forms.ModelForm):
+    Client = forms.ChoiceField(choices=[], required=False)
+    Entretien = forms.ChoiceField(choices=[], required=False)
+    Destinataire = forms.ChoiceField(choices=[], required=False)
+    Type = forms.ChoiceField(choices=[], required=False)
+    
+    def __init__(self, *args, **kwargs):
+        clients = kwargs.pop('clients', [])
+        entretiens = kwargs.pop('entretiens', [])
+        types = kwargs.pop('types', [])
+        super().__init__(*args, **kwargs)
+        
+        if clients:
+            self.fields['Client'].choices = [(c, c) for c in clients]
+        if entretiens:
+            self.fields['Entretien'].choices = [(e, e) for e in entretiens]
+            self.fields['Destinataire'].choices = [(e, e) for e in entretiens]
+        if types:
+            self.fields['Type'].choices = [('', '-- Sélectionner un type --')] + [(t, t) for t in types]
+    
     class Meta:
         model = Appareil
-        fields = ['Code_Client', 'Adresse', 'Code_Postal','Ville','Résidence','Informations','Incarcération','Type','Phonie','Transmetteur','Observations','Consigne_volatile','MES','RES']  
+        fields = ['Client', 'Entretien', 'Destinataire', 'Code_Client', 'Adresse', 'Code_Postal','Ville','Résidence','Informations','Incarcération','Type','Phonie','Transmetteur','Observations','Consigne_volatile','MES','RES']  
 
 def validate_phone(value):
     """Validate that the value is a 10-digit phone number starting with 0."""

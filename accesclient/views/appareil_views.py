@@ -114,16 +114,157 @@ class AppareilView(LoginRequiredMixin, View):
 
 def modify_appareil(request, id):
     appareil = get_object_or_404(Appareil, pk=id)
+    user = request.user
+    
+    # Get accessible accounts
+    accessible_accounts = [user.username, user.first_name]
+    
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_accounts.extend(delegated_users)
+    
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_accounts.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+    
+    accessible_accounts = list(set(accessible_accounts))
+    
+    # Get distinct clients for the dropdown
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        clients = Appareil.objects.filter(
+            Destinataire__in=accessible_accounts
+        ).values_list('Client', flat=True).distinct()
+    else:
+        clients = Appareil.objects.filter(
+            Entretien__in=accessible_accounts
+        ).values_list('Client', flat=True).distinct()
+    
+    clients = [c for c in clients if c]
+    
+    # Get distinct types
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        types = Appareil.objects.filter(
+            Destinataire__in=accessible_accounts
+        ).values_list('Type', flat=True).distinct()
+    else:
+        types = Appareil.objects.filter(
+            Entretien__in=accessible_accounts
+        ).values_list('Type', flat=True).distinct()
+    
+    types = [t for t in types if t]
     
     if request.method == 'POST':
-        form = AppareilModificationForm(request.POST, instance=appareil)
+        form = AppareilModificationForm(
+            request.POST, 
+            instance=appareil,
+            clients=clients,
+            entretiens=accessible_accounts,
+            types=types
+        )
         if form.is_valid():
             form.save()
             return redirect('http://127.0.0.1:8000/appareils/')  
     else:
-        form = AppareilModificationForm(instance=appareil)
+        form = AppareilModificationForm(
+            instance=appareil,
+            clients=clients,
+            entretiens=accessible_accounts,
+            types=types
+        )
     
     return render(request, 'accesclient/modify_appareil.html', {'form': form})
+
+
+def create_appareil(request):
+    """Create a new appareil with empty form fields"""
+    user = request.user
+    
+    # Get accessible accounts (same logic as AppareilView)
+    accessible_accounts = [user.username, user.first_name]
+    
+    # Get the client for the user - check if user is a Client
+    user_client = None
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        # User is a client, use user.first_name as the client
+        user_client = user.first_name
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien]
+        accessible_accounts.extend(delegated_users)
+    else:
+        # User is an Entretien, find their Client
+        client_record = Appareil.objects.filter(Entretien=user.first_name).first()
+        if client_record:
+            user_client = client_record.Client
+    
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_accounts.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+    
+    accessible_accounts = list(set(accessible_accounts))
+    
+    # Get distinct clients for the dropdown
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        clients = Appareil.objects.filter(
+            Destinataire__in=accessible_accounts
+        ).values_list('Client', flat=True).distinct()
+    else:
+        clients = Appareil.objects.filter(
+            Entretien__in=accessible_accounts
+        ).values_list('Client', flat=True).distinct()
+    
+    clients = [c for c in clients if c]
+    
+    # Get distinct types for the user's appareils
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        types = Appareil.objects.filter(
+            Destinataire__in=accessible_accounts
+        ).values_list('Type', flat=True).distinct()
+    else:
+        types = Appareil.objects.filter(
+            Entretien__in=accessible_accounts
+        ).values_list('Type', flat=True).distinct()
+    
+    types = [t for t in types if t]
+    
+    if request.method == 'POST':
+        form = AppareilModificationForm(
+            request.POST, 
+            clients=clients,
+            entretiens=accessible_accounts,
+            types=types
+        )
+        if form.is_valid():
+            new_appareil = form.save(commit=False)
+            new_appareil.Opérateur = request.user.username
+            new_appareil.save()
+            return redirect('http://127.0.0.1:8000/appareils/')  
+    else:
+        # Create form with initial client value
+        form = AppareilModificationForm(
+            clients=clients,
+            entretiens=accessible_accounts,
+            types=types,
+            initial={'Client': user_client} if user_client else {}
+        )
+    
+    return render(request, 'accesclient/modify_appareil.html', {'form': form, 'is_creating': True})
 
 
 def set_appareil_perdu(request, id):

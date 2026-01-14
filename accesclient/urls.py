@@ -21,7 +21,7 @@ from django.contrib.auth import views as auth_views
 from .views import SignUpView
 from .views import export_messages_to_excel
 from .views import AppareilView,ArchiveMessagesView
-from .views import create_message ,modify_appareil
+from .views import create_message ,modify_appareil, create_appareil
 from .views import export_appareils_to_excel
 from .views import set_appareil_perdu , modify_autres_if_meditrax ,create_astreinte,delete_astreinte,ManageTechniciansView
 from django.views.generic import RedirectView
@@ -55,6 +55,7 @@ urlpatterns = [
     path('signup/', SignUpView.as_view(), name='signup'),
     path('create_message/<int:N_ID>/', create_message, name='create_message'),
     path('modify_appareil/<int:id>/', modify_appareil, name='modify_appareil'),
+    path('create_appareil/', create_appareil, name='create_appareil'),
     #Astrientes
     path('create-astreinte/', create_astreinte, name='create_astreinte'),
     path('upload-excel/', views.upload_excel, name='upload_excel'),

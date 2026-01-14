@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Modifier Appareil</title>
+    <title>{% if is_creating %}Ajouter un Appareil{% else %}Modifier Appareil{% endif %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
     <style>
         body {
@@ -10,46 +10,49 @@
             background-color: #f4f4f9;
             color: #333;
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 130vh;
-            transform: scale(0.9); /* Scales the element to 80% of its original size */
-            
+            padding: 20px;
         }
 
         .container {
-            text-align: center;
-            width: 100%;
-            max-width: 600px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         h1 {
-            color: #6a1b9a; /* Purple color for the heading */
+            color: #6a1b9a;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         form {
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto; /* Center the form horizontally */
-            text-align: left; /* Align form content to the left */
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        form p {
+            margin-bottom: 20px;
+        }
+
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
         }
 
         form input,
         form select,
         form textarea {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+            box-sizing: border-box;
         }
 
         form input:focus,
@@ -59,19 +62,25 @@
             outline: none;
         }
 
+        form input[type="datetime-local"] {
+            padding: 8px;
+        }
+
         button {
-            background-color: #6a1b9a; /* Purple color for the button */
+            background-color: #6a1b9a;
             color: #fff;
             border: none;
             border-radius: 4px;
-            padding: 10px 20px;
+            padding: 12px 30px;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
         }
 
         button:hover {
-            background-color: #4a148c; /* Darker purple for hover effect */
+            background-color: #4a148c;
         }
 
         .errorlist {
@@ -84,15 +93,25 @@
             padding: 0;
             list-style-type: none;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            form {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Modifier Appareil</h1>
+        <h1>{% if is_creating %}Ajouter un Appareil{% else %}Modifier Appareil{% endif %}</h1>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Save</button>
+            <button type="submit">{% if is_creating %}Créer{% else %}Enregistrer{% endif %}</button>
         </form>
     </div>
 </body>

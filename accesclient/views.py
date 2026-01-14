@@ -28,6 +28,7 @@ __all__ = [
     # Appareil views
     'AppareilView',
     'modify_appareil',
+    'create_appareil',
     'set_appareil_perdu',
     'modify_autres_if_meditrax',
     'export_appareils_to_excel',

@@ -91,9 +91,15 @@
 <body>
     {% include 'navbar.html' %}
     <h1>Voici vos bases de données</h1>
-    <form action="{% url 'export_appareils' %}" method="get">
-        <button type="submit" class="Excel-button">Télécharger les données</button>
-    </form>
+    
+    <div style="display: flex; gap: 10px; align-items: center; margin: 20px 0 10px 60px; flex-wrap: wrap;">
+        <form action="{% url 'export_appareils' %}" method="get" style="margin: 0;">
+            <button type="submit" class="Excel-button" style="margin: 0; padding: 10px 15px; border: 2px solid #007bff; border-radius: 6px; background-color: #007bff; color: white; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">Télécharger les données</button>
+        </form>
+        <form action="{% url 'create_appareil' %}" method="get" style="margin: 0;">
+            <button type="submit" class="Excel-button" style="margin: 0; padding: 10px 15px; border: 2px solid #28a745; border-radius: 6px; background-color: #28a745; color: white; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">+ Ajouter un appareil</button>
+        </form>
+    </div>
 
     {% if entretiens|length > 1 %}
     <div class="entretien-selector">
