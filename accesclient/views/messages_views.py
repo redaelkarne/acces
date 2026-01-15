@@ -46,7 +46,12 @@ class MessagesView(LoginRequiredMixin, View):
             # For clients, derive entretiens from the messages
             entretiens = list(messages_list.values_list('entretien', flat=True).distinct())
         else:
-            messages_list = MessagesAscenseursDetails.objects.filter(entretien__in=accessible_accounts)
+            # For maintenance users, show messages where entretien matches OR is null/empty
+            messages_list = MessagesAscenseursDetails.objects.filter(
+                Q(entretien__in=accessible_accounts) | 
+                Q(entretien__isnull=True) | 
+                Q(entretien='')
+            )
             # For maintenance users, use the accessible_accounts list directly
             # This ensures the dropdown appears even if there are no active messages for some agencies
             entretiens = sorted(list(set(accessible_accounts)))
@@ -58,8 +63,11 @@ class MessagesView(LoginRequiredMixin, View):
         if selected_entretien:
             messages_list = messages_list.filter(entretien=selected_entretien)
         
+        # Order by date descending (most recent first)
+        messages_list = messages_list.order_by('-Date')
+        
         # Pagination
-        paginator = Paginator(messages_list, 20)  # Show 20 messages per page
+        paginator = Paginator(messages_list, 50)  # Show 50 messages per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -83,7 +91,11 @@ class MessagesView(LoginRequiredMixin, View):
 
         # Combine the content of the three columns into one called 'Résidence'
         for message in page_obj:
-            message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
+            try:
+                appareil = Appareil.objects.get(N_ID=message.N_ID)
+                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
+            except Appareil.DoesNotExist:
+                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
         
         selected_columns = [field_name for field_name in messages.get_fields() if request.GET.get(field_name)]
 
@@ -202,6 +214,10 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
                 search_filter |= Q(**{f"{field.name}__icontains": search_query})
             messages_list = messages_list.filter(search_filter)
 
+        # Order by date descending (most recent first)
+        if messages_list:
+            messages_list = messages_list.order_by('-Date')
+
         # Pagination
         paginator = Paginator(messages_list, 150)  # Show 150 messages per page
         page_number = request.GET.get('page')
@@ -220,7 +236,16 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
         # Generate custom column names dynamically
         custom_column_names = {field.name: field.verbose_name for field in ArchiveMessagesAscenseurs._meta.get_fields() if field.name not in excluded_columns}
         custom_column_names['entretien'] = 'Agence'
+        custom_column_names['Résidence'] = 'Coordonnées du Site'
         selected_columns = [field.name for field in ArchiveMessagesAscenseurs._meta.get_fields() if request.GET.get(field.name)]
+        
+        # Combine the content to create 'Résidence' for archive messages
+        for message in page_obj:
+            try:
+                appareil = Appareil.objects.get(N_ID=message.N_ID)
+                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
+            except Appareil.DoesNotExist:
+                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
 
         # Handle export functionality
         if 'export' in request.GET:

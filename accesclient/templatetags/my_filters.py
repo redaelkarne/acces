@@ -15,9 +15,9 @@ def get_attribute(obj, attr_name):
         attr_name = attr_name.replace(' ', '')
         value = getattr(obj, attr_name)
         
-        # Format dates
+        # Format dates without timezone conversion (dates are already in local time from DB)
         if isinstance(value, datetime.datetime):
-            return timezone.localtime(value).strftime('%d/%m/%Y %H:%M')
+            return value.strftime('%d/%m/%Y %H:%M')
         elif isinstance(value, datetime.date):
             return value.strftime('%d/%m/%Y')
             

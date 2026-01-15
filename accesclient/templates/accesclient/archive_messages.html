@@ -93,7 +93,7 @@
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
                         <label>
-                            <input type="checkbox" class="filterCheckbox" name="{{ field_name }}" checked> {{ verbose_name }}
+                            <input type="checkbox" class="filterCheckbox" name="{{ field_name }}" {% if field_name != 'Destinataire' %}checked{% endif %}> {{ verbose_name }}
                         </label><br>
                     {% endif %}
                 {% endfor %}
@@ -123,9 +123,9 @@
                             {% if field_name not in excluded_columns %}
                                 <td {% if field_name == 'Message' %} class="Message" {% endif %}>
                                     {% if field_name == 'Message' %}
-                                        {{ message.Message|default_if_none:"--" }}
+                                        {{ message|attr:"Message"|default:"" }}
                                     {% else %}
-                                        {{ message|attr:field_name|default_if_none:"--" }}
+                                        {{ message|get_attribute:field_name|default:"--" }}
                                     {% endif %}
                                 </td>
                             {% endif %}
@@ -218,6 +218,11 @@
             // Close the dropdown after applying filters
             document.getElementById("dropdownMenu").classList.remove("show");
         }
+        
+        // Apply filters on page load to hide unchecked columns by default
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFilters();
+        });
     </script>
 </body>
 </html>

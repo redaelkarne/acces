@@ -45,7 +45,7 @@
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
                         <label>
-                            <input type="checkbox" class="filterCheckbox" name="{{ verbose_name }}" checked> {{ verbose_name }}
+                            <input type="checkbox" class="filterCheckbox" name="{{ verbose_name }}" {% if field_name != 'Destinataire' %}checked{% endif %}> {{ verbose_name }}
                         </label>
                     {% endif %}
                 {% endfor %}
@@ -166,6 +166,11 @@
             if (dropdownMenu && !dropbtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
                 dropdownMenu.classList.remove("show");
             }
+        });
+        
+        // Apply filters on page load to hide unchecked columns by default
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFilters();
         });
         
     </script>
