@@ -231,12 +231,20 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'Stocké', 'Incarcération', 'Opérateur', 'Confirmation', 
             'ConfIncar', 'ConfIncar2', 'Commentaires', 'Autres1', 
             'Autres2', 'Etat', 'Téléphone_2', 'N_ID', 'N_des_messages',
+            'Adresse', 'Code_Postal', 'ville',  # Hide these as they're combined in Résidence
         ]
 
-        # Generate custom column names dynamically
-        custom_column_names = {field.name: field.verbose_name for field in ArchiveMessagesAscenseurs._meta.get_fields() if field.name not in excluded_columns}
+        # Generate custom column names dynamically in specific order
+        custom_column_names = {}
+        # Add columns in desired order
+        for field in ArchiveMessagesAscenseurs._meta.get_fields():
+            if field.name not in excluded_columns:
+                custom_column_names[field.name] = field.verbose_name
+                # Insert Résidence right after Date
+                if field.name == 'Date':
+                    custom_column_names['Résidence'] = 'Coordonnées du Site'
+        
         custom_column_names['entretien'] = 'Agence'
-        custom_column_names['Résidence'] = 'Coordonnées du Site'
         selected_columns = [field.name for field in ArchiveMessagesAscenseurs._meta.get_fields() if request.GET.get(field.name)]
         
         # Combine the content to create 'Résidence' for archive messages
