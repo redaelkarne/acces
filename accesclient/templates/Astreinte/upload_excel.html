@@ -89,10 +89,66 @@
     }
   }
   
+  .instructions {
+    background-color: #e7f3ff;
+    border-left: 4px solid #4a90e2;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .instructions h3 {
+    margin-top: 0;
+    color: #4a90e2;
+    font-size: 18px;
+  }
+
+  .instructions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+  }
+
+  .instructions li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+
+  .instructions strong {
+    color: #333;
+  }
+
+  .download-template {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+  }
+
+  .download-template:hover {
+    background-color: #218838;
+  }
 
 </style>
 <div class="upload-container">
   <h2>Importer fichier au format Excel</h2>
+  
+  <div class="instructions">
+    <h3>📋 Instructions importantes :</h3>
+    <ul>
+      <li><strong>Format de fichier :</strong> Fichiers Excel uniquement (.xlsx ou .xls)</li>
+      <li><strong>Colonnes requises :</strong> Client, dateDebut, dateFin, priorite, detailAstreinte, type1-4, media1-4, Créé par</li>
+      <li><strong>Format des dates :</strong> JJ/MM/AAAA HH:MM (exemple : 19/01/2026 14:01) ou AAAA-MM-JJ HH:MM</li>
+      <li><strong>Types acceptés :</strong> Uniquement <strong>'Telephone'</strong> ou <strong>'Email'</strong> (respectez les majuscules)</li>
+      <li><strong>Priorité :</strong> Valeurs acceptées : 1, 2, 3 ou 4</li>
+      <li><strong>Numéros de téléphone :</strong> Format de 10 à 15 chiffres, commençant par '0' ou '+'</li>
+    </ul>
+    <a href="{% url 'download_excel_template' %}" class="download-template">📥 Télécharger le modèle Excel</a>
+  </div>
+
   <form method="post" enctype="multipart/form-data" class="upload-form">
     {% csrf_token %}
     <div class="form-group">

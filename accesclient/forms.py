@@ -251,9 +251,13 @@ class AstreinteForm(forms.ModelForm):
 
             if type_field and media_field:
                 if type_field == 'Telephone':
-                    validate_phone(media_field)
+                    try:
+                        cleaned_data[f"media{i}"] = validate_phone(media_field)
+                    except ValidationError as e:
+                        self.add_error(f'media{i}', f"Numéro de téléphone invalide : {e.message}")
                 elif type_field == 'Email':
-                    validate_email(media_field)
+                    if not validate_email(media_field):
+                        self.add_error(f'media{i}', f"Format d'email invalide : {media_field}. Veuillez entrer une adresse email valide.")
 
         return cleaned_data
     
@@ -348,14 +352,44 @@ def process_excel_file(file, created_by):
                         if not validate_email(str(media_field)): 
                             error_messages.append(f"Le format de l'email n'est pas respecté à la ligne {index + 1}, type{i}: {media_field}.")
                     else:
-                        error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}.")
+                        error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}. Les types acceptés sont uniquement 'Telephone' ou 'Email' (respectez les majuscules).")
 
+            # Parse and convert date formats
+            try:
+                date_debut = row["dateDebut"]
+                if isinstance(date_debut, str):
+                    # Try multiple date formats
+                    for date_format in ["%d/%m/%Y %H:%M", "%d/%m/%Y %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"]:
+                        try:
+                            date_debut = datetime.strptime(date_debut, date_format)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        error_messages.append(f"Format de date invalide pour dateDebut à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
+                        continue
+                
+                date_fin = row["dateFin"]
+                if isinstance(date_fin, str):
+                    # Try multiple date formats
+                    for date_format in ["%d/%m/%Y %H:%M", "%d/%m/%Y %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"]:
+                        try:
+                            date_fin = datetime.strptime(date_fin, date_format)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        error_messages.append(f"Format de date invalide pour dateFin à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
+                        continue
+            except Exception as e:
+                error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
+                continue
             
             if not error_messages:
                 Astreinte.objects.create(
                     entretien=row["Client"],
-                    date_debut=row["dateDebut"],
-                    date_fin=row["dateFin"],
+                    date_debut=date_debut,
+                    date_fin=date_fin,
                     priorite=row["priorite"],
                     detail_astreinte=row.get("detailAstreinte", ""),
                     type1=row.get("type1"),

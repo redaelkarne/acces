@@ -5,8 +5,9 @@ from django.db.models import Q, Case, When, Value, BooleanField
 from django.contrib import messages
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 import json
 import os
 from django.conf import settings
@@ -15,6 +16,7 @@ from ..models import Astreinte, Appareil, Alerte
 from ..forms import AstreinteForm, ExcelUploadForm, process_excel_file, AlerteForm
 
 
+@login_required
 def create_astreinte(request):
     if request.method == 'POST':
         form = AstreinteForm(request.POST, user=request.user)  # Pass the user here
@@ -23,13 +25,17 @@ def create_astreinte(request):
             astreinte.operator_create = request.user.username
             astreinte.technician = form.cleaned_data['technician']
             astreinte.save()
-            return redirect('http://127.0.0.1:8000/create-astreinte/')
+            messages.success(request, "Astreinte créée avec succès !")
+            return redirect('view_astreintes')
+        else:
+            messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
     else:
         form = AstreinteForm(user=request.user)
 
     return render(request, 'Astreinte/astreinte_form.html', {'form': form})
 
 
+@login_required
 def upload_excel(request):
     if request.method == "POST":
         form = ExcelUploadForm(request.POST, request.FILES)
@@ -50,6 +56,16 @@ def upload_excel(request):
 
     return render(request, "Astreinte/upload_excel.html", {"form": form})
 
+
+def download_excel_template(request):
+    """Download the Excel template file for astreintes"""
+    file_path = os.path.join(settings.BASE_DIR, 'exempleAstreinteASTUS.xlsx')
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='exempleAstreinteASTUS.xlsx')
+    else:
+        raise Http404("Le fichier template n'existe pas.")
+
+@login_required
 
 def view_astreintes(request):
     user = request.user
@@ -153,6 +169,7 @@ def view_astreintes(request):
     })
 
 
+@login_required
 def delete_astreinte(request, id_astreinte):
     astreinte = get_object_or_404(Astreinte, id_astreinte=id_astreinte)
     astreinte.delete()
@@ -160,6 +177,7 @@ def delete_astreinte(request, id_astreinte):
     return redirect(reverse('view_astreintes'))
 
 
+@login_required
 def modify_astreinte(request, id_astreinte):
     astreinte = get_object_or_404(Astreinte, id_astreinte=id_astreinte)
 
@@ -182,6 +200,7 @@ def modify_astreinte(request, id_astreinte):
 
 # ============ ALERTES MANAGEMENT ============
 
+@login_required
 def list_alertes(request):
     """Liste toutes les alertes configurées"""
     user = request.user
@@ -229,6 +248,7 @@ def list_alertes(request):
     })
 
 
+@login_required
 @require_http_methods(["GET"])
 def get_alertes_json(request):
     """Retourne les alertes au format JSON pour l'affichage dans le modal"""
@@ -283,6 +303,7 @@ def get_alertes_json(request):
     return JsonResponse({'alertes': alertes_data})
 
 
+@login_required
 @require_http_methods(["POST"])
 def create_alerte(request):
     """Crée une nouvelle alerte"""
@@ -311,6 +332,7 @@ def create_alerte(request):
         }, status=400)
 
 
+@login_required
 @require_http_methods(["POST"])
 def update_alerte(request, id_alerte):
     """Modifie une alerte existante"""
@@ -371,6 +393,7 @@ def update_alerte(request, id_alerte):
         }, status=400)
 
 
+@login_required
 @require_http_methods(["DELETE"])
 def delete_alerte(request, id_alerte):
     """Supprime une alerte"""

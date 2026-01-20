@@ -59,6 +59,7 @@ urlpatterns = [
     #Astrientes
     path('create-astreinte/', create_astreinte, name='create_astreinte'),
     path('upload-excel/', views.upload_excel, name='upload_excel'),
+    path('download-excel-template/', views.download_excel_template, name='download_excel_template'),
     path('astreintes/', views.view_astreintes, name='view_astreintes'),
     path('astreinte/<int:id_astreinte>/modifier/', views.modify_astreinte, name='modify_astreinte'),
     path('astreinte/delete/<int:id_astreinte>/', views.delete_astreinte, name='delete_astreinte'),
