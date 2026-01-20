@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.contrib.messages import get_messages
 
 from ..forms import CustomUserCreationForm
 
@@ -13,6 +14,18 @@ class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
+
+
+def logout_view(request):
+    """Vue personnalisée pour vider les messages avant déconnexion"""
+    # Vider tous les messages de la session
+    storage = get_messages(request)
+    for _ in storage:
+        pass  # Itérer pour marquer les messages comme utilisés
+    storage.used = True
+    
+    logout(request)
+    return redirect('login')
 
 
 def login_view(request):

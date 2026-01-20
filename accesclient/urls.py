@@ -39,7 +39,7 @@ urlpatterns = [
     path('consignes/', views.view_consignes, name='view_consignes'),
     # Login/logout URLs - Placed before include to override default auth views
     path('accounts/login/', views.login_view, name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('accounts/logout/', views.logout_view, name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('archive_messages/', ArchiveMessagesView.as_view(), name='archive_messages'),
     path('export_archive_messages/', ArchiveMessagesView.as_view(), name='export_archive_messages'),
