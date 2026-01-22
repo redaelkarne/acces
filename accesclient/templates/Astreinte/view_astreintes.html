@@ -312,14 +312,14 @@
                     <tr>
                         <td class="label-col">Période</td>
                         <td>
-                            {{ astreinte.date_debut|date:"d/m/Y H:i" }} <i class="fas fa-arrow-right" style="font-size: 0.8em; margin: 0 5px; color: #999;"></i> {{ astreinte.date_fin|date:"d/m/Y H:i"}}
+                            {{ astreinte.date_debut|format_local_datetime:"d/m/Y H:i" }} <i class="fas fa-arrow-right" style="font-size: 0.8em; margin: 0 5px; color: #999;"></i> {{ astreinte.date_fin|format_local_datetime:"d/m/Y H:i" }}
                         </td>
                         <td class="label-col">Infos</td>
                         <td style="font-size: 0.8em; color: #666; line-height: 1.1;">
                             {% if astreinte.operator_create %}Créé: {{ astreinte.operator_create }}{% endif %}
-                            {% if astreinte.date_import %} le {{ astreinte.date_import }}{% endif %}
+                            {% if astreinte.date_import %} le {{ astreinte.date_import|format_local_datetime:"d/m/Y H:i" }}{% endif %}
                             {% if astreinte.operator_update %}<br>Modif: {{ astreinte.operator_update }}{% endif %}
-                            {% if astreinte.date_last_update %} le {{ astreinte.date_last_update }}{% endif %}
+                            {% if astreinte.date_last_update %} le {{ astreinte.date_last_update|format_local_datetime:"d/m/Y H:i" }}{% endif %}
                         </td>
                     </tr>
                     <tr>

@@ -230,19 +230,26 @@ class AstreinteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
+        # Get current timezone
+        current_tz = timezone.get_current_timezone()
+        
         # Combine date and time for date_debut
         date_debut = cleaned_data.get('date_debut')
         heure_debut = cleaned_data.get('heure_debut')
         if date_debut and heure_debut:
+            # Create a naive datetime
             dt = datetime.combine(date_debut, heure_debut)
-            cleaned_data['date_debut'] = timezone.make_aware(dt)
+            # Make it aware in the current timezone, then convert to UTC
+            cleaned_data['date_debut'] = timezone.make_aware(dt, current_tz)
             
         # Combine date and time for date_fin
         date_fin = cleaned_data.get('date_fin')
         heure_fin = cleaned_data.get('heure_fin')
         if date_fin and heure_fin:
+            # Create a naive datetime
             dt = datetime.combine(date_fin, heure_fin)
-            cleaned_data['date_fin'] = timezone.make_aware(dt)
+            # Make it aware in the current timezone, then convert to UTC
+            cleaned_data['date_fin'] = timezone.make_aware(dt, current_tz)
 
         
         for i in range(1, 5):
@@ -369,6 +376,10 @@ def process_excel_file(file, created_by):
                         error_messages.append(f"Format de date invalide pour dateDebut à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
                 
+                # Make date_debut timezone aware (treat as local time)
+                if date_debut and not timezone.is_aware(date_debut):
+                    date_debut = timezone.make_aware(date_debut, timezone.get_current_timezone())
+                
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
                     # Try multiple date formats
@@ -381,6 +392,11 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Format de date invalide pour dateFin à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
+                
+                # Make date_fin timezone aware (treat as local time)
+                if date_fin and not timezone.is_aware(date_fin):
+                    date_fin = timezone.make_aware(date_fin, timezone.get_current_timezone())
+                    
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
                 continue
@@ -401,7 +417,7 @@ def process_excel_file(file, created_by):
                     type4=row.get("type4"),
                     media4=row.get("media4"),
                     operator_create=created_by,
-                    date_import=datetime.now()
+                    date_import=timezone.now()
                 )
 
         if error_messages:
