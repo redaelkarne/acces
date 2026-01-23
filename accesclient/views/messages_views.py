@@ -350,7 +350,7 @@ def create_message(request, N_ID):
                 Destinataire=destinataire,
                 N_ID=N_ID  # Use the N_ID from URL parameter directly
             )
-            return redirect('http://127.0.0.1:8000/appareils/')  
+            return redirect('appareil_list')  
     else:
         # Initialize form with N_ID value
         form = MessageForm(user=request.user, initial={'N_ID': N_ID})

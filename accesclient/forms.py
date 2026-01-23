@@ -78,10 +78,15 @@ class MessageForm(forms.Form):
     
 
 class AppareilModificationForm(forms.ModelForm):
-    Client = forms.ChoiceField(choices=[], required=False)
-    Entretien = forms.ChoiceField(choices=[], required=False)
-    Destinataire = forms.ChoiceField(choices=[], required=False)
+    Client = forms.ChoiceField(choices=[], required=True)
+    Entretien = forms.ChoiceField(choices=[], required=True)
+    Destinataire = forms.ChoiceField(choices=[], required=True)
     Type = forms.ChoiceField(choices=[], required=False)
+    Code_Client = forms.CharField(required=True)
+    Adresse = forms.CharField(required=True)
+    Code_Postal = forms.CharField(required=True)
+    Ville = forms.CharField(required=True)
+    Résidence = forms.CharField(required=True)
     
     def __init__(self, *args, **kwargs):
         clients = kwargs.pop('clients', [])
@@ -96,6 +101,12 @@ class AppareilModificationForm(forms.ModelForm):
             self.fields['Destinataire'].choices = [(e, e) for e in entretiens]
         if types:
             self.fields['Type'].choices = [('', '-- Sélectionner un type --')] + [(t, t) for t in types]
+        
+        # Make other fields optional
+        optional_fields = ['Informations', 'Incarcération', 'Type', 'Phonie', 'Transmetteur', 'Observations', 'Consigne_volatile', 'MES', 'RES']
+        for field_name in optional_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
     
     class Meta:
         model = Appareil

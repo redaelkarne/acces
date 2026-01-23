@@ -174,7 +174,7 @@ def modify_appareil(request, id):
         )
         if form.is_valid():
             form.save()
-            return redirect('http://127.0.0.1:8000/appareils/')  
+            return redirect('appareil_list')  
     else:
         form = AppareilModificationForm(
             instance=appareil,
@@ -258,7 +258,7 @@ def create_appareil(request):
             new_appareil = form.save(commit=False)
             new_appareil.Opérateur = request.user.username
             new_appareil.save()
-            return redirect('http://127.0.0.1:8000/appareils/')  
+            return redirect('appareil_list')  
     else:
         # Create form with initial client value
         form = AppareilModificationForm(
@@ -285,7 +285,7 @@ def set_appareil_perdu(request, id):
     appareil.save()
 
     # Redirect to the appareils list (or wherever you want)
-    return redirect('http://127.0.0.1:8000/appareils/')
+    return redirect('appareil_list')
 
 
 def modify_autres_if_meditrax(request, id):
@@ -293,7 +293,7 @@ def modify_autres_if_meditrax(request, id):
 
     # Redirect if the Client is not Meditrax
     if appareil.Client != "MEDITRAX":
-        return redirect('http://127.0.0.1:8000/appareils/')
+        return redirect('appareil_list')
 
     if request.method == 'POST':
         form = AppareilModificationForm(request.POST, instance=appareil)
@@ -301,7 +301,7 @@ def modify_autres_if_meditrax(request, id):
             # Save only the 'Autres' field
             appareil.Autres = form.cleaned_data['Autres_1']
             appareil.save()
-            return redirect('http://127.0.0.1:8000/appareils/')
+            return redirect('appareil_list')
     else:
         form = AppareilModificationForm(instance=appareil)
 
