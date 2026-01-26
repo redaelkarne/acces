@@ -45,7 +45,7 @@
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
                         <label>
-                            <input type="checkbox" class="filterCheckbox" name="{{ verbose_name }}" {% if field_name != 'Destinataire' %}checked{% endif %}> {{ verbose_name }}
+                            <input type="checkbox" class="filterCheckbox" name="{{ verbose_name }}" {% if field_name != 'Destinataire' and field_name != 'entretien' %}checked{% endif %}> {{ verbose_name }}
                         </label>
                     {% endif %}
                 {% endfor %}

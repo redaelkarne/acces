@@ -77,7 +77,10 @@ class MessagesView(LoginRequiredMixin, View):
             'Date': 'Date du message',
             'Nature_de_l_appel': 'Type d\'appel',
             'code_client': 'N°APP',
-            'Résidence': 'Coordonnées du Site',
+            'Adresse': 'Adresse',
+            'Code_Postal': 'Code Postal',
+            'ville': 'Ville',
+            'Résidence': 'Résidence',
             'Message': 'Message',
             'Action': 'Action',
             'Nom': 'Nom',
@@ -89,13 +92,13 @@ class MessagesView(LoginRequiredMixin, View):
             'Ville_de_l_appelant': 'Ville de l\'appelant',
         }
 
-        # Combine the content of the three columns into one called 'Résidence'
+        # Get Résidence from Appareil model
         for message in page_obj:
             try:
                 appareil = Appareil.objects.get(N_ID=message.N_ID)
-                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
+                message.Résidence = appareil.Résidence if appareil.Résidence else "--"
             except Appareil.DoesNotExist:
-                message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
+                message.Résidence = "--"
         
         selected_columns = [field_name for field_name in messages.get_fields() if request.GET.get(field_name)]
 
