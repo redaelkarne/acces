@@ -53,22 +53,22 @@ def is_email(value):
 @register.filter
 def format_local_datetime(value, format_string="d/m/Y H:i"):
     """
-    Format a datetime that's already stored in local time in the database.
-    Django treats naive datetimes as UTC when USE_TZ=True, but our DB stores
-    them in local time. We need to display them without the UTC conversion.
+    Format a datetime in Paris timezone.
+    Converts UTC times from database to Paris local time for display.
     """
     if not value:
         return ''
     
     if isinstance(value, datetime.datetime):
-        # Django reads naive datetimes from DB and treats them as UTC
-        # But our DB stores them in local time (Paris time)
-        # So we display them as naive to show the actual stored value
-        if timezone.is_aware(value):
-            # Make it naive in UTC timezone to get the raw stored value
-            value = timezone.make_naive(value, timezone.utc)
+        import pytz
+        paris_tz = pytz.timezone('Europe/Paris')
         
-        # Format the datetime - this is now the actual value from DB
+        # If the datetime is timezone-aware, convert it to Paris time
+        if timezone.is_aware(value):
+            # Convert from UTC (or any timezone) to Paris timezone
+            value = value.astimezone(paris_tz)
+        
+        # Format the datetime - this is now in Paris time
         format_map = {
             'd/m/Y H:i': '%d/%m/%Y %H:%M',
             'd/m/Y': '%d/%m/%Y',
