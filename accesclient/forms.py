@@ -241,8 +241,9 @@ class AstreinteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
-        # Get current timezone
-        current_tz = timezone.get_current_timezone()
+        # Use Paris timezone explicitly to avoid server timezone issues
+        import pytz
+        paris_tz = pytz.timezone('Europe/Paris')
         
         # Combine date and time for date_debut
         date_debut = cleaned_data.get('date_debut')
@@ -250,8 +251,8 @@ class AstreinteForm(forms.ModelForm):
         if date_debut and heure_debut:
             # Create a naive datetime
             dt = datetime.combine(date_debut, heure_debut)
-            # Make it aware in the current timezone, then convert to UTC
-            cleaned_data['date_debut'] = timezone.make_aware(dt, current_tz)
+            # Make it aware in Paris timezone explicitly
+            cleaned_data['date_debut'] = paris_tz.localize(dt)
             
         # Combine date and time for date_fin
         date_fin = cleaned_data.get('date_fin')
@@ -259,8 +260,8 @@ class AstreinteForm(forms.ModelForm):
         if date_fin and heure_fin:
             # Create a naive datetime
             dt = datetime.combine(date_fin, heure_fin)
-            # Make it aware in the current timezone, then convert to UTC
-            cleaned_data['date_fin'] = timezone.make_aware(dt, current_tz)
+            # Make it aware in Paris timezone explicitly
+            cleaned_data['date_fin'] = paris_tz.localize(dt)
 
         
         for i in range(1, 5):
@@ -374,6 +375,10 @@ def process_excel_file(file, created_by):
 
             # Parse and convert date formats
             try:
+                # Import pytz for explicit timezone handling
+                import pytz
+                paris_tz = pytz.timezone('Europe/Paris')
+                
                 date_debut = row["dateDebut"]
                 if isinstance(date_debut, str):
                     # Try multiple date formats
@@ -386,10 +391,13 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Format de date invalide pour dateDebut à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
+                elif hasattr(date_debut, 'to_pydatetime'):
+                    # If it's a pandas Timestamp, convert to datetime
+                    date_debut = date_debut.to_pydatetime()
                 
-                # Make date_debut timezone aware (treat as local time)
+                # Make date_debut timezone aware using Paris timezone explicitly
                 if date_debut and not timezone.is_aware(date_debut):
-                    date_debut = timezone.make_aware(date_debut, timezone.get_current_timezone())
+                    date_debut = paris_tz.localize(date_debut)
                 
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
@@ -403,10 +411,13 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Format de date invalide pour dateFin à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
+                elif hasattr(date_fin, 'to_pydatetime'):
+                    # If it's a pandas Timestamp, convert to datetime
+                    date_fin = date_fin.to_pydatetime()
                 
-                # Make date_fin timezone aware (treat as local time)
+                # Make date_fin timezone aware using Paris timezone explicitly
                 if date_fin and not timezone.is_aware(date_fin):
-                    date_fin = timezone.make_aware(date_fin, timezone.get_current_timezone())
+                    date_fin = paris_tz.localize(date_fin)
                     
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
