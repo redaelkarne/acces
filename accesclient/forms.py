@@ -375,10 +375,6 @@ def process_excel_file(file, created_by):
 
             # Parse and convert date formats
             try:
-                # Import pytz for explicit timezone handling
-                import pytz
-                paris_tz = pytz.timezone('Europe/Paris')
-                
                 date_debut = row["dateDebut"]
                 if isinstance(date_debut, str):
                     # Try multiple date formats
@@ -392,12 +388,11 @@ def process_excel_file(file, created_by):
                         error_messages.append(f"Format de date invalide pour dateDebut à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
                 elif hasattr(date_debut, 'to_pydatetime'):
-                    # If it's a pandas Timestamp, convert to datetime
+                    # If it's a pandas Timestamp, convert to datetime (naive, no timezone)
                     date_debut = date_debut.to_pydatetime()
-                
-                # Make date_debut timezone aware using Paris timezone explicitly
-                if date_debut and not timezone.is_aware(date_debut):
-                    date_debut = paris_tz.localize(date_debut)
+                    # Remove timezone info if present to keep as naive datetime
+                    if timezone.is_aware(date_debut):
+                        date_debut = date_debut.replace(tzinfo=None)
                 
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
@@ -412,12 +407,11 @@ def process_excel_file(file, created_by):
                         error_messages.append(f"Format de date invalide pour dateFin à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
                 elif hasattr(date_fin, 'to_pydatetime'):
-                    # If it's a pandas Timestamp, convert to datetime
+                    # If it's a pandas Timestamp, convert to datetime (naive, no timezone)
                     date_fin = date_fin.to_pydatetime()
-                
-                # Make date_fin timezone aware using Paris timezone explicitly
-                if date_fin and not timezone.is_aware(date_fin):
-                    date_fin = paris_tz.localize(date_fin)
+                    # Remove timezone info if present to keep as naive datetime
+                    if timezone.is_aware(date_fin):
+                        date_fin = date_fin.replace(tzinfo=None)
                     
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
