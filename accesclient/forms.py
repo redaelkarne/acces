@@ -373,8 +373,11 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}. Les types acceptés sont uniquement 'Telephone' ou 'Email' (respectez les majuscules).")
 
-            # Parse and convert date formats - keep as naive datetime (no timezone)
+            # Parse and convert date formats - make timezone aware to prevent Django auto-conversion
             try:
+                from zoneinfo import ZoneInfo
+                local_tz = ZoneInfo('Europe/Paris')
+                
                 date_debut = row["dateDebut"]
                 if isinstance(date_debut, str):
                     # Try multiple date formats
@@ -394,6 +397,10 @@ def process_excel_file(file, created_by):
                         date_debut.hour, date_debut.minute, date_debut.second
                     )
                 
+                # Make timezone aware in local timezone to prevent Django UTC conversion
+                if date_debut and not timezone.is_aware(date_debut):
+                    date_debut = date_debut.replace(tzinfo=local_tz)
+                
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
                     # Try multiple date formats
@@ -412,6 +419,10 @@ def process_excel_file(file, created_by):
                         date_fin.year, date_fin.month, date_fin.day,
                         date_fin.hour, date_fin.minute, date_fin.second
                     )
+                
+                # Make timezone aware in local timezone to prevent Django UTC conversion
+                if date_fin and not timezone.is_aware(date_fin):
+                    date_fin = date_fin.replace(tzinfo=local_tz)
                     
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")

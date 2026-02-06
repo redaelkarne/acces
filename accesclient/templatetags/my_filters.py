@@ -53,15 +53,20 @@ def is_email(value):
 @register.filter
 def format_local_datetime(value, format_string="d/m/Y H:i"):
     """
-    Format a datetime without timezone conversion.
-    Display the datetime as-is from the database (already in correct local time).
+    Format a datetime in local timezone.
+    Converts from UTC storage to local Paris time for display.
     """
     if not value:
         return ''
     
     if isinstance(value, datetime.datetime):
-        # Format the datetime directly without timezone conversion
-        # The datetime from DB is already in the correct timezone
+        # If timezone-aware, convert to local timezone for display
+        if timezone.is_aware(value):
+            from zoneinfo import ZoneInfo
+            local_tz = ZoneInfo('Europe/Paris')
+            value = value.astimezone(local_tz)
+        
+        # Format the datetime
         format_map = {
             'd/m/Y H:i': '%d/%m/%Y %H:%M',
             'd/m/Y': '%d/%m/%Y',
