@@ -373,7 +373,7 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}. Les types acceptés sont uniquement 'Telephone' ou 'Email' (respectez les majuscules).")
 
-            # Parse and convert date formats
+            # Parse and convert date formats - keep as naive datetime (no timezone)
             try:
                 date_debut = row["dateDebut"]
                 if isinstance(date_debut, str):
@@ -388,11 +388,11 @@ def process_excel_file(file, created_by):
                         error_messages.append(f"Format de date invalide pour dateDebut à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
                 elif hasattr(date_debut, 'to_pydatetime'):
-                    # If it's a pandas Timestamp, convert to datetime (naive, no timezone)
-                    date_debut = date_debut.to_pydatetime()
-                    # Remove timezone info if present to keep as naive datetime
-                    if timezone.is_aware(date_debut):
-                        date_debut = date_debut.replace(tzinfo=None)
+                    # Convert pandas Timestamp to naive datetime by extracting components
+                    date_debut = datetime(
+                        date_debut.year, date_debut.month, date_debut.day,
+                        date_debut.hour, date_debut.minute, date_debut.second
+                    )
                 
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
@@ -407,11 +407,11 @@ def process_excel_file(file, created_by):
                         error_messages.append(f"Format de date invalide pour dateFin à la ligne {index + 1}. Utilisez le format JJ/MM/AAAA HH:MM ou AAAA-MM-JJ HH:MM.")
                         continue
                 elif hasattr(date_fin, 'to_pydatetime'):
-                    # If it's a pandas Timestamp, convert to datetime (naive, no timezone)
-                    date_fin = date_fin.to_pydatetime()
-                    # Remove timezone info if present to keep as naive datetime
-                    if timezone.is_aware(date_fin):
-                        date_fin = date_fin.replace(tzinfo=None)
+                    # Convert pandas Timestamp to naive datetime by extracting components
+                    date_fin = datetime(
+                        date_fin.year, date_fin.month, date_fin.day,
+                        date_fin.hour, date_fin.minute, date_fin.second
+                    )
                     
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
