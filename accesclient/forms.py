@@ -2,7 +2,7 @@
 import re
 import pandas as pd
 from django import forms
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire, Alerte
 from django.contrib.auth.forms import UserCreationForm
