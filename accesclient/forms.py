@@ -397,6 +397,9 @@ def process_excel_file(file, created_by):
                         date_debut.hour, date_debut.minute, date_debut.second
                     )
                 
+                # Add 1 hour to compensate for timezone storage
+                date_debut = date_debut + timedelta(hours=1)
+                
                 # Make timezone aware in local timezone to prevent Django UTC conversion
                 if date_debut and not timezone.is_aware(date_debut):
                     date_debut = date_debut.replace(tzinfo=local_tz)
@@ -419,6 +422,9 @@ def process_excel_file(file, created_by):
                         date_fin.year, date_fin.month, date_fin.day,
                         date_fin.hour, date_fin.minute, date_fin.second
                     )
+                
+                # Add 1 hour to compensate for timezone storage
+                date_fin = date_fin + timedelta(hours=1)
                 
                 # Make timezone aware in local timezone to prevent Django UTC conversion
                 if date_fin and not timezone.is_aware(date_fin):
