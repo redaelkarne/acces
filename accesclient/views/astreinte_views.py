@@ -84,7 +84,7 @@ def view_astreintes(request):
         ).values_list('Entretien', flat=True).distinct())
         
         # Remove None values and add current user
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         # User doesn't exist as Client - only use user.first_name
@@ -212,8 +212,8 @@ def list_alertes(request):
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
         
-        # Remove None values and add current user
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        # Remove None and PERDU values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         # User doesn't exist as Client - only use user.first_name
@@ -261,8 +261,8 @@ def get_alertes_json(request):
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
         
-        # Remove None values and add current user
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        # Remove None and PERDU values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         # User doesn't exist as Client - only use user.first_name
@@ -343,7 +343,7 @@ def update_alerte(request, id_alerte):
         delegated_users = list(Appareil.objects.filter(
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         accessible_users = [user.first_name]
@@ -404,7 +404,7 @@ def delete_alerte(request, id_alerte):
         delegated_users = list(Appareil.objects.filter(
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         accessible_users = [user.first_name]

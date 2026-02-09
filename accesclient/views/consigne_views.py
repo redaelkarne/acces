@@ -20,8 +20,8 @@ def view_consignes(request):
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
         
-        # Remove None values and add current user
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        # Remove None and PERDU values and add current user
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_users = [user.username] + delegated_users
     else:
         # User doesn't exist as Client - only use user.first_name

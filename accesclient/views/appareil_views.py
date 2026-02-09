@@ -28,7 +28,8 @@ class AppareilView(LoginRequiredMixin, View):
             delegated_users = list(Appareil.objects.filter(
                 Client=user.first_name
             ).values_list('Entretien', flat=True).distinct())
-            delegated_users = [entretien for entretien in delegated_users if entretien]
+            # Filter out None and PERDU values
+            delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
             accessible_accounts.extend(delegated_users)
 
         # 3. Tentative de chargement du JSON
@@ -43,8 +44,8 @@ class AppareilView(LoginRequiredMixin, View):
             except Exception as e:
                 print(f"Erreur lecture JSON: {e}")
 
-        # Remove duplicates
-        accessible_accounts = list(set(accessible_accounts))
+        # Remove duplicates and PERDU
+        accessible_accounts = [acc for acc in set(accessible_accounts) if acc != 'PERDU']
 
         # Fetch Appareil records based on user type
         # Check if the user exists as Client in Appareil table
@@ -123,7 +124,8 @@ def modify_appareil(request, id):
         delegated_users = list(Appareil.objects.filter(
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        # Filter out None and PERDU values
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_accounts.extend(delegated_users)
     
     json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
@@ -136,7 +138,8 @@ def modify_appareil(request, id):
         except Exception as e:
             print(f"Erreur lecture JSON: {e}")
     
-    accessible_accounts = list(set(accessible_accounts))
+    # Remove duplicates and PERDU
+    accessible_accounts = [acc for acc in set(accessible_accounts) if acc != 'PERDU']
     # Remove PERDU from accessible accounts
     accessible_accounts = [acc for acc in accessible_accounts if acc != 'PERDU']
     
@@ -201,7 +204,8 @@ def create_appareil(request):
         delegated_users = list(Appareil.objects.filter(
             Client=user.first_name
         ).values_list('Entretien', flat=True).distinct())
-        delegated_users = [entretien for entretien in delegated_users if entretien]
+        # Filter out None and PERDU values
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
         accessible_accounts.extend(delegated_users)
     else:
         # User is an Entretien, find their Client
@@ -351,6 +355,16 @@ def generate_excel(request):
 
     # Logic copied from AppareilView.get to ensure consistency
     accessible_accounts = [user.first_name]
+    
+    # Get delegated users from Appareil
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        # Filter out None and PERDU values
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
+        accessible_accounts.extend(delegated_users)
+    
     json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
     if os.path.exists(json_path):
         try:
@@ -360,6 +374,9 @@ def generate_excel(request):
                     accessible_accounts.extend(config[user.first_name])
         except Exception:
             pass
+
+    # Remove duplicates and PERDU
+    accessible_accounts = [acc for acc in set(accessible_accounts) if acc != 'PERDU']
 
     if Appareil.objects.filter(Client=user.first_name).exists():
         appareils = Appareil.objects.filter(Destinataire__in=accessible_accounts)
