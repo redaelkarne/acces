@@ -243,23 +243,19 @@ class AstreinteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
-        # Combine date and time for date_debut
+        # Combine date and time for date_debut - keep as naive datetime
         date_debut = cleaned_data.get('date_debut')
         heure_debut = cleaned_data.get('heure_debut')
         if date_debut and heure_debut:
-            # Create a naive datetime
-            dt = datetime.combine(date_debut, heure_debut)
-            # Make it timezone-aware using Django's timezone (Europe/Paris from settings)
-            cleaned_data['date_debut'] = timezone.make_aware(dt)
+            # Create a naive datetime - no timezone conversion
+            cleaned_data['date_debut'] = datetime.combine(date_debut, heure_debut)
             
-        # Combine date and time for date_fin
+        # Combine date and time for date_fin - keep as naive datetime
         date_fin = cleaned_data.get('date_fin')
         heure_fin = cleaned_data.get('heure_fin')
         if date_fin and heure_fin:
-            # Create a naive datetime
-            dt = datetime.combine(date_fin, heure_fin)
-            # Make it timezone-aware using Django's timezone (Europe/Paris from settings)
-            cleaned_data['date_fin'] = timezone.make_aware(dt)
+            # Create a naive datetime - no timezone conversion
+            cleaned_data['date_fin'] = datetime.combine(date_fin, heure_fin)
 
         
         for i in range(1, 5):
@@ -371,11 +367,8 @@ def process_excel_file(file, created_by):
                     else:
                         error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}. Les types acceptés sont uniquement 'Telephone' ou 'Email' (respectez les majuscules).")
 
-            # Parse and convert date formats - make timezone aware to prevent Django auto-conversion
+            # Parse and convert date formats - keep as naive datetime
             try:
-                from zoneinfo import ZoneInfo
-                local_tz = ZoneInfo('Europe/Paris')
-                
                 date_debut = row["dateDebut"]
                 if isinstance(date_debut, str):
                     # Try multiple date formats
@@ -395,13 +388,6 @@ def process_excel_file(file, created_by):
                         date_debut.hour, date_debut.minute, date_debut.second
                     )
                 
-                # Add 1 hour to compensate for timezone storage
-                date_debut = date_debut + timedelta(hours=1)
-                
-                # Make timezone aware in local timezone to prevent Django UTC conversion
-                if date_debut and not timezone.is_aware(date_debut):
-                    date_debut = date_debut.replace(tzinfo=local_tz)
-                
                 date_fin = row["dateFin"]
                 if isinstance(date_fin, str):
                     # Try multiple date formats
@@ -420,13 +406,6 @@ def process_excel_file(file, created_by):
                         date_fin.year, date_fin.month, date_fin.day,
                         date_fin.hour, date_fin.minute, date_fin.second
                     )
-                
-                # Add 1 hour to compensate for timezone storage
-                date_fin = date_fin + timedelta(hours=1)
-                
-                # Make timezone aware in local timezone to prevent Django UTC conversion
-                if date_fin and not timezone.is_aware(date_fin):
-                    date_fin = date_fin.replace(tzinfo=local_tz)
                     
             except Exception as e:
                 error_messages.append(f"Erreur lors du traitement des dates à la ligne {index + 1}: {str(e)}")
