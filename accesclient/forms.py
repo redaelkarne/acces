@@ -224,13 +224,15 @@ class AstreinteForm(forms.ModelForm):
 
         if self.instance and self.instance.pk:
             if self.instance.date_debut:
-                local_dt = timezone.localtime(self.instance.date_debut)
-                self.initial['date_debut'] = local_dt.strftime('%Y-%m-%d')
-                self.initial['heure_debut'] = local_dt.strftime('%H:%M')
+                # Use the datetime directly without timezone conversion to avoid double offset
+                dt = self.instance.date_debut
+                self.initial['date_debut'] = dt.strftime('%Y-%m-%d')
+                self.initial['heure_debut'] = dt.strftime('%H:%M')
             if self.instance.date_fin:
-                local_dt = timezone.localtime(self.instance.date_fin)
-                self.initial['date_fin'] = local_dt.strftime('%Y-%m-%d')
-                self.initial['heure_fin'] = local_dt.strftime('%H:%M')
+                # Use the datetime directly without timezone conversion to avoid double offset
+                dt = self.instance.date_fin
+                self.initial['date_fin'] = dt.strftime('%Y-%m-%d')
+                self.initial['heure_fin'] = dt.strftime('%H:%M')
 
         if user:
             # Filter technicians based on the logged-in user's client
@@ -241,18 +243,14 @@ class AstreinteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
-        # Use Paris timezone explicitly to avoid server timezone issues
-        import pytz
-        paris_tz = pytz.timezone('Europe/Paris')
-        
         # Combine date and time for date_debut
         date_debut = cleaned_data.get('date_debut')
         heure_debut = cleaned_data.get('heure_debut')
         if date_debut and heure_debut:
             # Create a naive datetime
             dt = datetime.combine(date_debut, heure_debut)
-            # Make it aware in Paris timezone explicitly
-            cleaned_data['date_debut'] = paris_tz.localize(dt)
+            # Make it timezone-aware using Django's timezone (Europe/Paris from settings)
+            cleaned_data['date_debut'] = timezone.make_aware(dt)
             
         # Combine date and time for date_fin
         date_fin = cleaned_data.get('date_fin')
@@ -260,8 +258,8 @@ class AstreinteForm(forms.ModelForm):
         if date_fin and heure_fin:
             # Create a naive datetime
             dt = datetime.combine(date_fin, heure_fin)
-            # Make it aware in Paris timezone explicitly
-            cleaned_data['date_fin'] = paris_tz.localize(dt)
+            # Make it timezone-aware using Django's timezone (Europe/Paris from settings)
+            cleaned_data['date_fin'] = timezone.make_aware(dt)
 
         
         for i in range(1, 5):
