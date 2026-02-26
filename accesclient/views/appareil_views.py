@@ -400,11 +400,8 @@ def generate_excel(request):
         col = 1
         ws.cell(row=row_num, column=col, value=appareil.N_ID); col += 1
         
-        if appareil.DateCreation:
-            local_date_creation = timezone.localtime(appareil.DateCreation).strftime('%Y-%m-%d %H:%M:%S')
-            ws.cell(row=row_num, column=col, value=local_date_creation); col += 1
-        else:
-            col += 1
+        # Use DateCreation as-is from database
+        ws.cell(row=row_num, column=col, value=appareil.DateCreation); col += 1
             
         ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Client)); col += 1
         ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Opérateur)); col += 1
@@ -423,19 +420,31 @@ def generate_excel(request):
         ws.cell(row=row_num, column=col, value=sanitize_text(appareil.Utilisateur)); col += 1
         
         if appareil.dateImport:
-            local_date_import = timezone.localtime(appareil.dateImport).strftime('%Y-%m-%d %H:%M:%S')
+            # Handle both timezone-aware and naive datetimes
+            if timezone.is_aware(appareil.dateImport):
+                local_date_import = timezone.localtime(appareil.dateImport).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                local_date_import = appareil.dateImport.strftime('%Y-%m-%d %H:%M:%S')
             ws.cell(row=row_num, column=col, value=local_date_import); col += 1
         else:
             col += 1
             
         if appareil.MES:
-            local_mes = timezone.localtime(appareil.MES).strftime('%Y-%m-%d %H:%M:%S')
+            # Handle both timezone-aware and naive datetimes
+            if timezone.is_aware(appareil.MES):
+                local_mes = timezone.localtime(appareil.MES).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                local_mes = appareil.MES.strftime('%Y-%m-%d %H:%M:%S')
             ws.cell(row=row_num, column=col, value=local_mes); col += 1
         else:
             col += 1
             
         if appareil.RES:
-            local_res = timezone.localtime(appareil.RES).strftime('%Y-%m-%d %H:%M:%S')
+            # Handle both timezone-aware and naive datetimes
+            if timezone.is_aware(appareil.RES):
+                local_res = timezone.localtime(appareil.RES).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                local_res = appareil.RES.strftime('%Y-%m-%d %H:%M:%S')
             ws.cell(row=row_num, column=col, value=local_res); col += 1
         else:
             col += 1

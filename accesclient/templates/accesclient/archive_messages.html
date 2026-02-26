@@ -15,21 +15,22 @@
     <form action="{% url 'archive_messages' %}" method="get">
         <button type="submit" name="export" value="true" class="Excel-button">Télécharger les données</button>
         <!-- Preserve filters for export -->
-        <input type="hidden" name="start_date" value="{{ start_date }}">
-        <input type="hidden" name="end_date" value="{{ end_date }}">
-        <input type="hidden" name="entretien" value="{{ selected_entretien }}">
-        <input type="hidden" name="search" value="{{ search_query }}">
+        {% if start_date %}<input type="hidden" name="start_date" value="{{ start_date }}">{% endif %}
+        {% if end_date %}<input type="hidden" name="end_date" value="{{ end_date }}">{% endif %}
+        {% if selected_entretien %}<input type="hidden" name="entretien" value="{{ selected_entretien }}">{% endif %}
+        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
     </form>
 
+    <!-- Combined Filter Form -->
     <div class="filters-row">
-        <!-- Combined Filter Form -->
-        <div class="combined-filter-container">
-            <form method="GET" action="" class="combined-filter-form" id="combined-form">
+        <div class="combined-filter-container" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0 20px 20px;; max-width: 1200px;">
+            <form method="GET" action="" class="combined-filter-form" id="combined-form" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
                 
-                {% if entretiens|length > 1 %}
+                <!-- Entretien Selector -->
+                {% if entretiens %}
                 <div class="filter-group">
-                    <label for="entretien" class="filter-label">Entretien:</label>
-                    <select name="entretien" id="entretien" class="filter-select" onchange="this.form.submit()">
+                    <label for="entretien-selector" class="filter-label" style="font-weight: 600; display: block; margin-bottom: 5px;">Entretien:</label>
+                    <select name="entretien" id="entretien-selector" class="filter-select" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px; min-width: 150px;">
                         <option value="">-- Tous --</option>
                         {% for entretien in entretiens %}
                             <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
@@ -39,41 +40,60 @@
                 {% endif %}
 
                 <div class="filter-group">
-                    <label for="start_date" class="filter-label">Du:</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="filter-input">
+                    <label for="start_date" class="filter-label" style="font-weight: 600; display: block; margin-bottom: 5px;">Du:</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="filter-input" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px;">
                 </div>
                 
                 <div class="filter-group">
-                    <label for="end_date" class="filter-label">Au:</label>
-                    <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="filter-input">
+                    <label for="end_date" class="filter-label" style="font-weight: 600; display: block; margin-bottom: 5px;">Au:</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="filter-input" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px;">
                 </div>
 
                 <div class="filter-group search-group">
-                    <label for="search" class="filter-label">Recherche:</label>
-                    <input type="text" id="search" name="search" value="{{ search_query }}" class="filter-input search-input" placeholder="Rechercher...">
+                    <label for="search" class="filter-label" style="font-weight: 600; display: block; margin-bottom: 5px;">Recherche:</label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" class="filter-input search-input" placeholder="Rechercher..." style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px; min-width: 200px;">
                 </div>
 
-                <!-- Include hidden inputs for the selected columns -->
+                <!-- Include hidden inputs for the selected columns (exclude filter fields) -->
                 {% for column in selected_columns %}
-                    <input type="hidden" name="{{ column }}" value="1">
+                    {% if column != 'entretien' and column != 'start_date' and column != 'end_date' and column != 'search' %}
+                        <input type="hidden" name="{{ column }}" value="1">
+                    {% endif %}
                 {% endfor %}
 
-                <div class="filter-actions">
-                    <button type="submit" class="filter-button search-btn">Filtrer</button>
-                    <button type="button" class="filter-button reset-btn" onclick="resetFilters()">Réinitialiser</button>
+                <div class="filter-actions" style="display: flex; gap: 10px;">
+                    <button type="submit" class="filter-button search-btn" style="padding: 10px 20px; background: #800080; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Filtrer</button>
+                    <button type="button" class="filter-button reset-btn" onclick="resetFilters()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Réinitialiser</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        // Clean empty fields before submitting the main form
+        document.getElementById('combined-form').addEventListener('submit', function(e) {
+            // Remove or disable empty inputs before submission (but not selects or hidden inputs with values)
+            const inputs = this.querySelectorAll('input[type="text"], input[type="date"]');
+            inputs.forEach(input => {
+                if (!input.value || input.value === '') {
+                    input.disabled = true;
+                }
+            });
+            
+            // Also remove entretien if it's empty
+            const entretienSelect = document.getElementById('entretien-selector');
+            if (entretienSelect && (!entretienSelect.value || entretienSelect.value === '')) {
+                entretienSelect.disabled = true;
+            }
+        });
+        
         function resetFilters() {
             // Clear all filters
             document.getElementById('search').value = '';
             document.getElementById('start_date').value = '';
             document.getElementById('end_date').value = '';
             
-            const entretienSelect = document.getElementById('entretien');
+            const entretienSelect = document.getElementById('entretien-selector');
             if (entretienSelect) {
                 entretienSelect.selectedIndex = 0;
             }

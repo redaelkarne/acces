@@ -9,8 +9,10 @@ from django.db.models import Q
 from django.utils.dateparse import parse_date
 from django.core.cache import cache
 from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
+from io import BytesIO
 import csv
-from datetime import datetime
+from datetime import datetime, date
 import json
 import os
 from django.conf import settings
@@ -119,109 +121,87 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
         user = request.user
         messages = ArchiveMessagesAscenseurs.objects.first()
 
-        # Retrieve date parameters
+        # Retrieve filter parameters
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-
-        # Build cache key based on date range
-        # Include 'entretien' in cache key to cache filtered results separately if needed, 
-        # OR handle filtering after cache retrieval. 
-        # Here we filter AFTER cache retrieval to keep cache generic for the date range.
         selected_entretien = request.GET.get('entretien')
-        
-        cache_key = f'archive_messages_{user.username}_{start_date_str}_{end_date_str}'
-        cached_data = cache.get(cache_key)
-        
-        messages_list = None
-        entretiens = []
-
-        if cached_data is None:
-            # 1. Liste par défaut (comportement actuel)
-            accessible_accounts = [user.first_name]
-
-            # 2. Tentative de chargement du JSON
-            json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
-            if os.path.exists(json_path):
-                try:
-                    with open(json_path, 'r', encoding='utf-8') as f:
-                        config = json.load(f)
-                        if user.first_name in config:
-                            accessible_accounts.extend(config[user.first_name])
-                except Exception as e:
-                    print(f"Erreur lecture JSON: {e}")
-
-            # Fetch messages for the user based on user type
-            is_client = Appareil.objects.filter(Client=user.first_name).exists()
-            if is_client:
-                messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
-            else:
-                messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
-            
-            # Determine the date range
-            if start_date_str and end_date_str:
-                start_date = parse_date(start_date_str)
-                end_date = parse_date(end_date_str)
-            elif start_date_str:
-                start_date = parse_date(start_date_str)
-                end_date = timezone.now()
-            elif end_date_str:
-                start_date = timezone.make_aware(datetime.datetime.min)
-                end_date = parse_date(end_date_str)
-            else:
-                # Default to the last 24 hours
-                start_date = timezone.now() - timezone.timedelta(days=1)
-                end_date = timezone.now()
-
-            # Print debugging information
-            print(f"Filtering messages from {start_date} to {end_date}")
-
-            # Apply the date range filter
-            messages_list = messages_list.filter(Date__range=[start_date, end_date])
-            
-            # Get unique "Entretien" values for the user (AFTER date filtering to be relevant)
-            entretiens = list(messages_list.values_list('entretien', flat=True).distinct())
-
-            # Get the selected "Entretien" from GET parameters
-            selected_entretien = request.GET.get('entretien')
-
-            # Filter messages based on selected "Entretien"
-            if selected_entretien:
-                messages_list = messages_list.filter(entretien=selected_entretien)
-
-            # Cache the results (including entretiens list to avoid re-querying)
-            cache_data = {
-                'messages_list': messages_list,
-                'entretiens': entretiens
-            }
-            cache.set(cache_key, cache_data, timeout=60*15)  # Cache timeout of 15 minutes
-        else:
-            # Retrieve from cache structure
-            if isinstance(cached_data, dict):
-                entretiens = cached_data.get('entretiens', [])
-                messages_list = cached_data.get('messages_list')
-            else:
-                # Fallback/Legacy cache
-                messages_list = cached_data
-                entretiens = []
-
-            # Apply entretien filter on cached results if needed
-            if selected_entretien and messages_list:
-                messages_list = messages_list.filter(entretien=selected_entretien)
-
-        # Search functionality
         search_query = request.GET.get('search', '')
-        if search_query and messages_list:
+        
+        # Debug: print received parameters
+        print(f"=== Archive Messages Filters ===")
+        print(f"User: {user.first_name}")
+        print(f"Start date: {start_date_str}")
+        print(f"End date: {end_date_str}")
+        print(f"Entretien: {selected_entretien}")
+        print(f"Search: {search_query}")
+        
+        # 1. Get accessible accounts
+        accessible_accounts = [user.first_name]
+        json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    if user.first_name in config:
+                        accessible_accounts.extend(config[user.first_name])
+            except Exception as e:
+                print(f"Erreur lecture JSON: {e}")
+
+        # 2. Get entretiens list (always needed for dropdown)
+        is_client = Appareil.objects.filter(Client=user.first_name).exists()
+        if is_client:
+            # For clients, get entretiens from all available messages
+            all_messages = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
+            entretiens = list(all_messages.values_list('entretien', flat=True).distinct())
+        else:
+            # For maintenance users, use accessible_accounts to ensure dropdown always appears
+            entretiens = sorted(list(set(accessible_accounts)))
+        
+        # 3. Fetch messages for the user based on user type
+        if is_client:
+            messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
+        else:
+            messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
+        
+        # 4. Apply date range filter
+        if start_date_str and end_date_str:
+            start_date = parse_date(start_date_str)
+            end_date = parse_date(end_date_str)
+            print(f"Date filter: {start_date_str} to {end_date_str}")
+        elif start_date_str:
+            start_date = parse_date(start_date_str)
+            end_date = timezone.now()
+            print(f"Date filter: {start_date_str} to now")
+        elif end_date_str:
+            start_date = timezone.make_aware(datetime.datetime.min)
+            end_date = parse_date(end_date_str)
+            print(f"Date filter: beginning to {end_date_str}")
+        else:
+            # Default to the last 24 hours
+            start_date = timezone.now() - timezone.timedelta(days=1)
+            end_date = timezone.now()
+            print(f"Date filter: default 24h")
+
+        messages_list = messages_list.filter(Date__range=[start_date, end_date])
+        print(f"Messages after date filter: {messages_list.count()}")
+
+        # 5. Filter messages based on selected "Entretien"
+        if selected_entretien:
+            messages_list = messages_list.filter(entretien=selected_entretien)
+            print(f"Filtering by entretien: {selected_entretien}, count: {messages_list.count()}")
+
+        # 6. Search functionality
+        if search_query:
             search_filter = Q()
             for field in ArchiveMessagesAscenseurs._meta.fields:
-                # Use icontains for all fields
                 search_filter |= Q(**{f"{field.name}__icontains": search_query})
             messages_list = messages_list.filter(search_filter)
+            print(f"Messages after search '{search_query}': {messages_list.count()}")
 
-        # Order by date descending (most recent first)
-        if messages_list:
-            messages_list = messages_list.order_by('-Date')
+        # 7. Order by date descending (most recent first)
+        messages_list = messages_list.order_by('-Date')
 
-        # Pagination
+        # 8. Pagination
         paginator = Paginator(messages_list, 150)  # Show 150 messages per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -260,22 +240,24 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
 
         # Handle export functionality
         if 'export' in request.GET:
-            # Apply filters again for export (since page_obj is paginated)
-            # We need the full list for export, filtered by date and entretien
-            export_list = messages_list # This is already filtered by date and entretien (if applied)
-            return self.export_to_csv(export_list, selected_columns)
-
-        # Recalculate accessible_accounts for context (since it's not cached)
-        accessible_accounts = [user.first_name]
-        json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
-        if os.path.exists(json_path):
-            try:
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    if user.first_name in config:
-                        accessible_accounts.extend(config[user.first_name])
-            except Exception:
-                pass
+            # For export, use all non-excluded columns
+            export_columns = [field.name for field in ArchiveMessagesAscenseurs._meta.get_fields() 
+                            if field.name not in excluded_columns]
+            # Add 'Résidence' and make sure 'entretien' is included
+            if 'entretien' not in export_columns:
+                export_columns.append('entretien')
+            export_columns.append('Résidence')
+            
+            # Prepare messages with Résidence field
+            export_list = messages_list
+            for message in export_list:
+                try:
+                    appareil = Appareil.objects.get(N_ID=message.N_ID)
+                    message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
+                except Appareil.DoesNotExist:
+                    message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
+            
+            return self.export_to_csv(export_list, export_columns, custom_column_names)
 
         return render(request, 'accesclient/archive_messages.html', {
             'messages': messages,
@@ -284,23 +266,69 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'selected_columns': selected_columns,
             'excluded_columns': excluded_columns,
             'custom_column_names': custom_column_names,
-            'start_date': start_date_str,
-            'end_date': end_date_str,
+            'start_date': start_date_str or '',
+            'end_date': end_date_str or '',
             'entretiens': entretiens,
-            'selected_entretien': selected_entretien,
-            'search_query': search_query,
+            'selected_entretien': selected_entretien or '',
+            'search_query': search_query or '',
         })
 
-    def export_to_csv(self, messages_list, selected_columns):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="archive_messages.csv"'
+    def export_to_csv(self, messages_list, export_columns, custom_column_names):
+        """Export messages to Excel format instead of CSV"""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Archive Messages"
         
-        writer = csv.writer(response)
-        writer.writerow([col for col in selected_columns])
+        # Write header with custom names
+        headers = [custom_column_names.get(col, col) for col in export_columns]
+        for col_num, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
         
-        for message in messages_list:
-            row = [getattr(message, col) for col in selected_columns]
-            writer.writerow(row)
+        # Write data rows
+        for row_num, message in enumerate(messages_list, start=2):
+            for col_num, col in enumerate(export_columns, start=1):
+                value = getattr(message, col, None)
+                
+                # Handle datetime fields
+                if isinstance(value, datetime):
+                    if timezone.is_aware(value):
+                        value = timezone.localtime(value).strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        value = value.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(value, date):
+                    value = value.strftime('%Y-%m-%d')
+                elif value is None:
+                    value = ''
+                else:
+                    value = str(value)
+                
+                ws.cell(row=row_num, column=col_num, value=value)
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        response = HttpResponse(
+            output.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="archive_messages.xlsx"'
         
         return response
 
@@ -425,10 +453,14 @@ def export_messages_to_excel(request):
     # Write data rows
     for row_num, message in enumerate(messages, 2):  # Start from row 2 for data
         ws.cell(row=row_num, column=1, value=message.Destinataire)
-        # Convert timezone-aware datetime to local timezone
+        # Handle datetime - check if it's timezone-aware or naive
         if message.Date:
-            local_date = timezone.localtime(message.Date)
-            ws.cell(row=row_num, column=2, value=local_date.replace(tzinfo=None))
+            if timezone.is_aware(message.Date):
+                local_date = timezone.localtime(message.Date)
+                ws.cell(row=row_num, column=2, value=local_date.replace(tzinfo=None))
+            else:
+                # Naive datetime - use as-is
+                ws.cell(row=row_num, column=2, value=message.Date)
         else:
             ws.cell(row=row_num, column=2, value="")
             

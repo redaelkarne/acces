@@ -54,6 +54,38 @@
         <button onclick="applyFilters()" class="apply-button">Appliquer le filtre</button>
     </div>
 
+    <!-- Pagination before table -->
+    <div class="pagination-container" style="background: #f9f9f9; padding: 10px 15px; margin: 15px auto; max-width: 1200px; text-align: center; border-radius: 5px; border: 1px solid #ddd;">
+        <div style="color: #333; font-size: 13px; margin-bottom: 8px;">
+            Page <strong>{{ page_obj.number }}</strong> sur <strong>{{ page_obj.paginator.num_pages }}</strong> 
+            ({{ page_obj.paginator.count }} messages)
+        </div>
+        
+        {% if page_obj.paginator.num_pages > 1 %}
+        <ul style="display: flex; justify-content: center; list-style: none; padding: 0; margin: 0; flex-wrap: wrap; gap: 5px;">
+            {% if page_obj.has_previous %}
+                <li><a href="?{% url_replace page=1 %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹‹ Première</a></li>
+                <li><a href="?{% url_replace page=page_obj.previous_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹ Préc.</a></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-3' and num <= page_obj.number|add:'3' %}
+                    {% if page_obj.number == num %}
+                        <li><span style="display: inline-block; padding: 5px 10px; background: #c97cc9; color: white; border-radius: 3px; font-weight: bold; font-size: 12px;">{{ num }}</span></li>
+                    {% else %}
+                        <li><a href="?{% url_replace page=num %}" style="display: inline-block; padding: 5px 10px; background: #fff; color: #333; text-decoration: none; border-radius: 3px; border: 1px solid #ddd; font-size: 12px;">{{ num }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li><a href="?{% url_replace page=page_obj.next_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Suiv. ›</a></li>
+                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Dernière ››</a></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+
     <!-- Display the table -->
     <table id="messageTable">
         <thead>
@@ -85,41 +117,6 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- Pagination Controls -->
-    {% if page_obj.has_other_pages %}
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-            <li><a href="?{% url_replace page=1 %}">&laquo; First</a></li>
-            <li><a href="?{% url_replace page=page_obj.previous_page_number %}">&#9664; Previous</a></li>
-        {% endif %}
-
-        {% if page_obj.number > 1 %}
-            <li><a href="?{% url_replace page=1 %}">1</a></li>
-            {% if page_obj.number > 2 %}
-                <li><span>...</span></li>
-            {% endif %}
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-            {% if num >= page_obj.number|add:'-5' and num <= page_obj.number|add:'5' %}
-                {% if page_obj.number == num %}
-                    <li class="current">{{ num }}</li>
-                {% else %}
-                    <li><a href="?{% url_replace page=num %}">{{ num }}</a></li>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-
-        {% if page_obj.number < page_obj.paginator.num_pages %}
-            {% if page_obj.number < page_obj.paginator.num_pages|add:'-1' %}
-                <li><span>...</span></li>
-            {% endif %}
-            <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a></li>
-            <li><a href="?{% url_replace page=page_obj.next_page_number %}">Next &#9654;</a></li>
-        {% endif %}
-    </ul>
-    {% endif %}
 
     <script>
         function toggleDropdown() {
