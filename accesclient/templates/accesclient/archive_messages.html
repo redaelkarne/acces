@@ -68,17 +68,18 @@
 
     <script>
         function resetFilters() {
+            // Clear all filters
             document.getElementById('search').value = '';
-            // Reset dates if needed, or just search
-            // document.getElementById('start_date').value = '';
-            // document.getElementById('end_date').value = '';
-            // document.getElementById('entretien').selectedIndex = 0;
+            document.getElementById('start_date').value = '';
+            document.getElementById('end_date').value = '';
             
-            // Submit with empty search
-            const form = document.getElementById('combined-form');
-            const searchInput = document.getElementById('search');
-            searchInput.value = '';
-            form.submit();
+            const entretienSelect = document.getElementById('entretien');
+            if (entretienSelect) {
+                entretienSelect.selectedIndex = 0;
+            }
+            
+            // Redirect to base URL without any parameters
+            window.location.href = window.location.pathname;
         }
     </script>
 
@@ -102,79 +103,73 @@
         <button onclick="applyFilters()" class="apply-button">Appliquer le filter</button>
     </div>
     
-    <!-- Display the table -->
+    <!-- Pagination before table -->
+    <div class="pagination-container" style="background: #f9f9f9; padding: 10px 15px; margin: 15px auto; max-width: 1200px; text-align: center; border-radius: 5px; border: 1px solid #ddd;">
+        <div style="color: #333; font-size: 13px; margin-bottom: 8px;">
+            Page <strong>{{ page_obj.number }}</strong> sur <strong>{{ page_obj.paginator.num_pages }}</strong> 
+            ({{ page_obj.paginator.count }} messages)
+        </div>
+        
+        {% if page_obj.paginator.num_pages > 1 %}
+        <ul style="display: flex; justify-content: center; list-style: none; padding: 0; margin: 0; flex-wrap: wrap; gap: 5px;">
+            {% if page_obj.has_previous %}
+                <li><a href="?{% url_replace page=1 %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹‹ Première</a></li>
+                <li><a href="?{% url_replace page=page_obj.previous_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹ Préc.</a></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-3' and num <= page_obj.number|add:'3' %}
+                    {% if page_obj.number == num %}
+                        <li><span style="display: inline-block; padding: 5px 10px; background: #c97cc9; color: white; border-radius: 3px; font-weight: bold; font-size: 12px;">{{ num }}</span></li>
+                    {% else %}
+                        <li><a href="?{% url_replace page=num %}" style="display: inline-block; padding: 5px 10px; background: #fff; color: #333; text-decoration: none; border-radius: 3px; border: 1px solid #ddd; font-size: 12px;">{{ num }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li><a href="?{% url_replace page=page_obj.next_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Suiv. ›</a></li>
+                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Dernière ››</a></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
     
-        <table id="messageTable">
-            <thead>
-                <tr class="first-row">
-                    <!-- Define table headers with verbose names -->
+    <!-- Table and Pagination Wrapper -->
+    <div style="position: relative;">
+    <!-- Display the table -->
+    <table id="messageTable">
+        <thead>
+            <tr class="first-row">
+                <!-- Define table headers with verbose names -->
+                {% for field_name, verbose_name in custom_column_names.items %}
+                    {% if field_name not in excluded_columns %}
+                        <th>{{ verbose_name }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Populate table body with data -->
+            {% for message in messages_list %}
+                <tr>
                     {% for field_name, verbose_name in custom_column_names.items %}
                         {% if field_name not in excluded_columns %}
-                            <th>{{ verbose_name }}</th>
+                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                                {% if field_name == 'Message' %}
+                                    {{ message|attr:"Message"|default:"" }}
+                                {% else %}
+                                    {{ message|get_attribute:field_name|default:"--" }}
+                                {% endif %}
+                            </td>
                         {% endif %}
                     {% endfor %}
                 </tr>
-            </thead>
-            <tbody>
-                <!-- Populate table body with data -->
-                {% for message in messages_list %}
-                    <tr>
-                        {% for field_name, verbose_name in custom_column_names.items %}
-                            {% if field_name not in excluded_columns %}
-                                <td {% if field_name == 'Message' %} class="Message" {% endif %}>
-                                    {% if field_name == 'Message' %}
-                                        {{ message|attr:"Message"|default:"" }}
-                                    {% else %}
-                                        {{ message|get_attribute:field_name|default:"--" }}
-                                    {% endif %}
-                                </td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div> <!-- Close wrapper -->
     
-    <!-- Pagination Controls -->
-    {% if page_obj.has_other_pages %}
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-            <li><a href="?{% url_replace page=1 %}">&laquo; First</a></li>
-            <li><a href="?{% url_replace page=page_obj.previous_page_number %}">&#9664; Previous</a></li>
-        {% endif %}
-
-        {% if page_obj.number > 1 %}
-            <li><a href="?{% url_replace page=1 %}">1</a></li>
-            {% if page_obj.number > 2 %}
-                <li><span>...</span></li>
-            {% endif %}
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-            {% if num >= page_obj.number|add:'-5' and num <= page_obj.number|add:'5' %}
-                {% if page_obj.number == num %}
-                    <li class="current">{{ num }}</li>
-                {% else %}
-                    <li><a href="?{% url_replace page=num %}">{{ num }}</a></li>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-
-        {% if page_obj.number < page_obj.paginator.num_pages %}
-            {% if page_obj.number < page_obj.paginator.num_pages|add:'-1' %}
-                <li><span>...</span></li>
-            {% endif %}
-            <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a></li>
-            <li><a href="?{% url_replace page=page_obj.next_page_number %}">Next &#9654;</a></li>
-        {% endif %}
-    </ul>
-    {% endif %}
-    
-<!-- <div>
-    // <p>Total pages: {{ page_obj.paginator.num_pages }}</p>
-    // <p>Current page: {{ page_obj.number }}</p>
-
-    // </div> -->
     <script>
         // JavaScript for dynamic dropdown filter
         function toggleDropdown() {

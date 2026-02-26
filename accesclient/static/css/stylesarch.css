@@ -170,12 +170,26 @@ tr:hover {
     margin-left: 80px;
     border-radius: 5px;
 }
+
+/* Pagination row in table footer */
+tfoot {
+    display: table-footer-group !important;
+}
+
+.pagination-row {
+    background-color: #f9f9f9 !important;
+    padding: 20px !important;
+    border: 2px solid #007bff !important;
+    text-align: center !important;
+}
+
 .pagination {
-    margin-top: -4500px; /* Adjust this value as needed */
-    display: flex;
-    justify-content: center;
-    list-style: none;
-    padding: 0;
+    display: flex !important;
+    justify-content: center !important;
+    list-style: none !important;
+    padding: 10px 0 !important;
+    margin: 0 !important;
+    flex-wrap: wrap !important;
 }
 
 /* Pagination items */

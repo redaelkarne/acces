@@ -176,11 +176,15 @@ tr:hover {
     border-radius: 5px;
 }
 .pagination {
-    margin-top: -4500px; /* Adjust this value as needed */
+    margin-top: -3800px;
+    margin-bottom: 30px;
+    margin-left: 4%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     list-style: none;
     padding: 0;
+    transform: scale(0.78);
+    transform-origin: top left;
 }
 
 /* Pagination items */
