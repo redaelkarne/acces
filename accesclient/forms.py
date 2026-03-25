@@ -287,6 +287,10 @@ def validate_phone(phone_number):
     
     phone_number = str(phone_number).strip()
 
+    # Excel may provide numeric phones as float-like strings (e.g. 629261958.0)
+    if re.match(r'^\d+\.0$', phone_number):
+        phone_number = phone_number[:-2]
+
     # If it's a 9-digit number not starting with '0', prepend '0'
     if len(phone_number) == 9 and not phone_number.startswith('0'):
         phone_number = '0' + phone_number  
@@ -334,6 +338,7 @@ def process_excel_file(file, created_by):
         
         for index, row in df.iterrows():
             print(f"Processing row {index + 1}: {row['Client']}")  
+            normalized_media = {}
             
             
             priorite = row['priorite']
@@ -357,13 +362,13 @@ def process_excel_file(file, created_by):
                 
                 if type_field and media_field:
                     if type_field == "Telephone":
-                       
-                        media_field = validate_phone(media_field)  
-                        if not validate_phone(media_field):
-                            error_messages.append(f"Le format du numéro de téléphone est incorrect à la ligne {index + 1}, type{i}: {media_field}. Veuillez entrer un numéro valide de 10 chiffres commençant par 0, sans espaces ni caractères spéciaux.")
+                        normalized_media[f"media{i}"] = validate_phone(media_field)
                     elif type_field == "Email":
-                        if not validate_email(str(media_field)): 
+                        media_field = str(media_field).strip()
+                        if not validate_email(media_field): 
                             error_messages.append(f"Le format de l'email n'est pas respecté à la ligne {index + 1}, type{i}: {media_field}.")
+                        else:
+                            normalized_media[f"media{i}"] = media_field
                     else:
                         error_messages.append(f"Type '{type_field}' invalide à la ligne {index + 1}, type{i}. Les types acceptés sont uniquement 'Telephone' ou 'Email' (respectez les majuscules).")
 
@@ -419,14 +424,14 @@ def process_excel_file(file, created_by):
                     priorite=row["priorite"],
                     detail_astreinte=row.get("detailAstreinte", ""),
                     type1=row.get("type1"),
-                    media1=row.get("media1"),
+                    media1=normalized_media.get("media1", row.get("media1")),
                     type2=row.get("type2"),
-                    media2=row.get("media2"),
+                    media2=normalized_media.get("media2", row.get("media2")),
                     type3=row.get("type3"),
-                    media3=row.get("media3"),
+                    media3=normalized_media.get("media3", row.get("media3")),
                     type4=row.get("type4"),
-                    media4=row.get("media4"),
-                    operator_create=created_by,
+                    media4=normalized_media.get("media4", row.get("media4")),
+                    operator_create=str(row.get("Créé par", "")).strip() or created_by,
                     date_import=timezone.now()
                 )
 
