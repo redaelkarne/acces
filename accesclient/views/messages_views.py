@@ -41,12 +41,12 @@ class MessagesView(LoginRequiredMixin, View):
             except Exception as e:
                 print(f"Erreur lecture JSON: {e}")
 
+        accessible_accounts = [acc for acc in set(accessible_accounts) if acc and acc != 'PERDU']
+
         # Filter messages based on user type
         is_client = Appareil.objects.filter(Client=user.first_name).exists()
         if is_client:
             messages_list = MessagesAscenseursDetails.objects.filter(Destinataire__in=accessible_accounts)
-            # For clients, derive entretiens from the messages
-            entretiens = list(messages_list.values_list('entretien', flat=True).distinct())
         else:
             # For maintenance users, show messages where entretien matches OR is null/empty
             messages_list = MessagesAscenseursDetails.objects.filter(
@@ -54,9 +54,9 @@ class MessagesView(LoginRequiredMixin, View):
                 Q(entretien__isnull=True) | 
                 Q(entretien='')
             )
-            # For maintenance users, use the accessible_accounts list directly
-            # This ensures the dropdown appears even if there are no active messages for some agencies
-            entretiens = sorted(list(set(accessible_accounts)))
+
+        # Use the accessible accounts directly so the selector matches bdd/archives behavior
+        entretiens = sorted(accessible_accounts)
         
         # Get the selected "Entretien" from GET parameters
         selected_entretien = request.GET.get('entretien')
