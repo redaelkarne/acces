@@ -6,4 +6,3 @@ staticfiles/
 *.sqlite3
 
 # Access configuration - keep local modifications
-access_config.json
