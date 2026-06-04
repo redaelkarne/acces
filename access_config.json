@@ -81,5 +81,24 @@
         "KYO ASC 15",
         "KYO ASC 16",
         "KYO ASC 17"
+    ],
+    "SYCLEF": [
+        "TP FROID TARBES",
+        "TP FROID LAGLORIEUSE",
+        "TP FROID AGEN_TLSE",
+        "SEPCO",
+        "THELIA",
+        "SEPCO PYRENEES",
+        "CENTRAL REFRIGERATION",
+        "CECOFROID",
+        "SOREF MP",
+        "SUD OUEST REFRIGERATION 33"
+    ],
+    "LACROIX": [
+        "LACROIX PARIS",
+        "LACROIX BORDEAUX",
+        "LACROIX LYON",
+        "LACROIX TOULOUSE",
+        "LACROIX AUTRE"
     ]
 }

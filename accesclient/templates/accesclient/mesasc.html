@@ -119,6 +119,23 @@
     </table>
 
     <script>
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name === cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        function setCookie(name, value, days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${date.toUTCString()};path=/`;
+        }
+
         function toggleDropdown() {
             var dropdownMenu = document.getElementById("dropdownMenu");
             dropdownMenu.classList.toggle("show");
@@ -130,12 +147,15 @@
             const table = document.getElementById('messageTable');
             const headers = table.querySelectorAll('thead th');
             const rows = table.querySelectorAll('tbody tr');
+            const filterSettings = {};
 
             filterCheckboxes.forEach((checkbox, index) => {
                 // Find the index of the column for this checkbox
                 const columnIndex = Array.from(headers).findIndex(header => 
                     header.textContent.trim() === checkbox.name.trim()
                 );
+
+                filterSettings[checkbox.name] = checkbox.checked;
 
                 if (columnIndex !== -1) {
                     // Toggle header visibility
@@ -153,6 +173,8 @@
 
             // Close the dropdown
             document.getElementById("dropdownMenu").classList.remove("show");
+
+            setCookie('mesascColumnFilters', JSON.stringify(filterSettings), 30);
         }
 
         // Close dropdown when clicking outside
@@ -167,6 +189,20 @@
         
         // Apply filters on page load to hide unchecked columns by default
         document.addEventListener('DOMContentLoaded', function() {
+            const savedFilters = getCookie('mesascColumnFilters');
+            if (savedFilters) {
+                try {
+                    const filterSettings = JSON.parse(savedFilters);
+                    const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
+                    filterCheckboxes.forEach(checkbox => {
+                        if (filterSettings[checkbox.name] !== undefined) {
+                            checkbox.checked = filterSettings[checkbox.name];
+                        }
+                    });
+                } catch (e) {
+                    // Ignore malformed cookie and fallback to defaults
+                }
+            }
             applyFilters();
         });
         
@@ -182,6 +218,7 @@
                 //     row.classList.toggle('flash-red');
               //   });
           //   }
+                        }
             
            //  // Start flashing every 3 seconds if rows exist
            //  if (noRapportRows.length > 0) {
