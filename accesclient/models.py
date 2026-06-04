@@ -127,6 +127,7 @@ class MessagesAscenseursDetails(models.Model):
     Adresse = models.CharField(max_length=255, null=True, blank=True)
     Code_Postal = models.CharField(max_length=10, null=True, blank=True)
     code_client = models.CharField(max_length=50, null=True, blank=True)
+    Observations = models.CharField(max_length=2048, null=True, blank=True)
 
     class Meta:
         managed = False

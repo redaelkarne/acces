@@ -92,6 +92,7 @@ class MessagesView(LoginRequiredMixin, View):
             'Adresse_de_l_appelant': 'Adresse de l\'appelant',
             'Code_postal_de_l_appelant': 'Code postal de l\'appelant',
             'Ville_de_l_appelant': 'Ville de l\'appelant',
+            'Observations': 'Observations',
         }
 
         # Get Résidence from Appareil model
