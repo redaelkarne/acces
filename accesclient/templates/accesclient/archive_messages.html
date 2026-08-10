@@ -156,7 +156,7 @@
     </div>
     
     <!-- Table and Pagination Wrapper -->
-    <div style="position: relative;">
+    <div style="position: relative; overflow-x: auto;">
     <!-- Display the table -->
     <table id="messageTable">
         <thead>
@@ -164,7 +164,7 @@
                 <!-- Define table headers with verbose names -->
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
-                        <th>{{ verbose_name }}</th>
+                        <th class="{{ field_name }}">{{ verbose_name }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -175,7 +175,7 @@
                 <tr>
                     {% for field_name, verbose_name in custom_column_names.items %}
                         {% if field_name not in excluded_columns %}
-                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                            <td class="{{ field_name }}">
                                 {% if field_name == 'Message' %}
                                     {{ message|attr:"Message"|default:"" }}
                                 {% else %}
@@ -215,19 +215,16 @@
     
         function applyFilters() {
             const filterCheckboxes = document.querySelectorAll('.filterCheckbox');
-            const tableHeaders = document.querySelectorAll('th');
-            const tableCells = document.querySelectorAll('td');
-    
+
             filterCheckboxes.forEach(checkbox => {
                 const columnName = checkbox.name;
-                const columnIndex = Array.from(tableHeaders).findIndex(header => header.textContent === columnName);
-    
-                tableHeaders[columnIndex].style.display = checkbox.checked ? 'table-cell' : 'none';
-    
-                tableCells.forEach(cell => {
-                    if (cell.cellIndex === columnIndex) {
-                        cell.style.display = checkbox.checked ? 'table-cell' : 'none';
-                    }
+                const display = checkbox.checked ? '' : 'none';
+
+                document.querySelectorAll(`th.${CSS.escape(columnName)}`).forEach(header => {
+                    header.style.display = display;
+                });
+                document.querySelectorAll(`td.${CSS.escape(columnName)}`).forEach(cell => {
+                    cell.style.display = display;
                 });
             });
             // Close the dropdown after applying filters

@@ -27,15 +27,14 @@ label {
 
 /* Table styles */
 table {
-    width: 120%; /* Adjust the width as needed */
-    margin: 1% auto;
-    margin-left: 3%;
+    width: 95%;
+    margin: 20px auto;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transform: scale(0.78); /* Scales the element to 80% of its original size */
-    transform-origin: top left; /* Keeps the scaling consistent with the top-left corner */
-    
+    font-size: 13px; /* Compact text instead of a visual-only transform: scale(),
+                         which left a blank gap below the table equal to the
+                         un-scaled height it still reserved in the page layout. */
 }
 
 th, td {
@@ -172,25 +171,37 @@ tr:hover {
     display: flex;
     justify-content: center;
     list-style: none;
+    margin: 0;
     padding: 0;
-    position: relative;
-    top: -900px; /* Adjust this value to move it up or down */
-   
-    margin: 0; /* Remove any unnecessary margins */
-    padding: 0; /* Remove any unnecessary padding */
 }
+/* Actions cell: lay the per-button forms out horizontally and tightly instead of
+   letting the global `form { margin-bottom: 20px }` stack them vertically, which
+   was inflating every row's height. */
+.actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    padding: 3px !important;
+}
+
+.actions-cell form {
+    margin: 0;
+}
+
 /* Targeting buttons with the action-button class */
 .action-button {
     background-color: #4CAF50; /* Green background */
     border: none; /* Remove border */
     color: white; /* White text */
-    padding: 10px 20px; /* Padding for equal spacing */
+    padding: 4px 8px; /* Padding for equal spacing */
     text-align: center; /* Center text */
     text-decoration: none; /* No underline */
     display: inline-block; /* Align buttons inline */
-    font-size: 16px; /* Font size */
-    width: 150px; /* Set a fixed width for all buttons */
-    margin: 4px; /* Margin around buttons */
+    font-size: 12px; /* Font size */
+    width: auto; /* Let the button size to its label */
+    margin: 0; /* Margin around buttons */
     cursor: pointer; /* Pointer cursor on hover */
     border-radius: 4px; /* Rounded corners */
     transition: background-color 0.3s ease; /* Smooth background color transition */

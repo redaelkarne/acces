@@ -183,7 +183,7 @@
                         </td>
                     {% endif %}
                 {% endfor %}
-                <td>
+                <td class="actions-cell">
                     <!-- Use `N_ID` as the primary key for the URL -->
                     {% if appareil.N_ID %}
                         <form action="{% url 'create_message' appareil.N_ID %}" method="GET">
@@ -221,8 +221,8 @@
         {% if page_obj.has_other_pages %}
         <ul class="pagination">
             {% if page_obj.has_previous %}
-                <li><a href="?{% url_replace page=1 %}">&laquo; First</a></li>
-                <li><a href="?{% url_replace page=page_obj.previous_page_number %}">&#9664; Previous</a></li>
+                <li><a href="?{% url_replace page=1 %}">&laquo; Première</a></li>
+                <li><a href="?{% url_replace page=page_obj.previous_page_number %}">&#9664; Précédent</a></li>
             {% endif %}
 
             {% if page_obj.number|add:'-5' > 1 %}
@@ -250,8 +250,8 @@
             {% endif %}
 
             {% if page_obj.has_next %}
-                <li><a href="?{% url_replace page=page_obj.next_page_number %}">Next &#9654;</a></li>
-                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}">Last &raquo;</a></li>
+                <li><a href="?{% url_replace page=page_obj.next_page_number %}">Suivant &#9654;</a></li>
+                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}">Dernière &raquo;</a></li>
             {% endif %}
         </ul>
         {% endif %}

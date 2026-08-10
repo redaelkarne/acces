@@ -10,7 +10,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #E1EBEE;
-    overflow-x: hidden; /* Prevent horizontal scroll caused by scaled table */
 }
 
 h1 {
@@ -29,15 +28,15 @@ label {
 
 /* Table styles */
 table {
-    width: 120%; /* Adjust the width as needed */
-    margin: 1% auto;
-    margin-left: 4%;
+    width: 95%;
+    margin: 20px auto;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transform: scale(0.78); /* Scales the element to 80% of its original size */
-    transform-origin: top left; /* Keeps the scaling consistent with the top-left corner */
-    
+    font-size: 13px; /* Compact text instead of a visual-only transform: scale(),
+                         which left blank space below the table and, combined with
+                         the unconstrained Message column below, let long messages
+                         push the table past the viewport with no way to see the rest. */
 }
 
 
@@ -46,6 +45,7 @@ th, td {
     padding: 8px;
     text-align: center;
     white-space: normal; /* Empêche le texte de passer à la ligne suivante */
+    overflow-wrap: break-word;
 }
 
 th {
@@ -53,9 +53,9 @@ th {
 }
 
 /* Specific table cell styles */
-td.message {
+td.Message {
     max-width: 400px; /* Set maximum width for the "Message" cells */
-    min-width: 300px; /* Set minimum width for the "Message" cells */
+    text-align: left;
 }
 tr:nth-child(even) {
     background-color: #b3b0b0; /* Grey background color for even rows */
