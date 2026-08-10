@@ -1,29 +1,51 @@
 {% load static %}
-<body class="navbar-body">
 <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
-
+<link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}">
 
 <nav class="nav-bar">
-    <div class="icon-nav">
-        <img src="https://i.postimg.cc/C5rXtbbw/ASTUS-logo.jpg" alt="ASTUS Logo" class="logo">
-        <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
-        
+    <div class="nav-brand">
+        <img src="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" alt="ASTUS" class="logo">
+        <span class="brand-name">ASTUS Accès</span>
     </div>
 
-    <ul class="list-nav-bar active">
-        <li class="list-item"><a href="/messages_ascenseurs/">Messages en cours</a></li>
-        <li class="list-item"><a href="/archive_messages/">Archives</a></li>
-        <li class="list-item"><a href="/appareils/">Base de Données</a></li>
-        <li class="list-item"><a href="/astreintes/">Astreintes</a></li>
-        <li class="list-item"><a href="/consignes/">Consignes</a></li>
-        <li class="list-item">
-            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-                {% csrf_token %}
-            </form>
-            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Déconnecter</a>
+    <button type="button" class="burger-menu" id="burger-menu" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav-links">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <ul class="list-nav-bar" id="nav-links">
+        <li class="list-item{% if '/messages_ascenseurs/' in request.path %} active{% endif %}">
+            <a href="/messages_ascenseurs/"><i class="fas fa-comment-dots"></i> Messages en cours</a>
+        </li>
+        <li class="list-item{% if '/archive_messages' in request.path %} active{% endif %}">
+            <a href="/archive_messages/"><i class="fas fa-box-archive"></i> Archives</a>
+        </li>
+        <li class="list-item{% if '/appareils/' in request.path %} active{% endif %}">
+            <a href="/appareils/"><i class="fas fa-database"></i> Base de Données</a>
+        </li>
+        <li class="list-item{% if '/astreinte' in request.path or '/alertes/' in request.path %} active{% endif %}">
+            <a href="/astreintes/"><i class="fas fa-user-clock"></i> Astreintes</a>
+        </li>
+        <li class="list-item{% if '/consignes/' in request.path %} active{% endif %}">
+            <a href="/consignes/"><i class="fas fa-clipboard-list"></i> Consignes</a>
         </li>
     </ul>
-    
+
+    <div class="nav-actions">
+        <form id="logout-form" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-right-from-bracket"></i> Déconnecter</button>
+        </form>
+    </div>
 </nav>
 
-</body>
+<script>
+    (function () {
+        var burger = document.getElementById('burger-menu');
+        var links = document.getElementById('nav-links');
+        if (!burger || !links) return;
+        burger.addEventListener('click', function () {
+            var isOpen = links.classList.toggle('open');
+            burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    })();
+</script>

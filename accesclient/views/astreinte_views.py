@@ -76,33 +76,7 @@ def view_astreintes(request):
 
 
 
-    # Get delegated users dynamically from Appareil model based on user type
-    if Appareil.objects.filter(Client=user.first_name).exists():
-        # User exists as Client - get all distinct entretiens from Appareil
-        delegated_users = list(Appareil.objects.filter(
-            Client=user.first_name
-        ).values_list('Entretien', flat=True).distinct())
-        
-        # Remove None values and add current user
-        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
-        accessible_users = [user.username] + delegated_users
-    else:
-        # User doesn't exist as Client - only use user.first_name
-        accessible_users = [user.first_name]
-
-    # Load additional access from JSON config
-    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
-    if os.path.exists(json_path):
-        try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                if user.first_name in config:
-                    accessible_users.extend(config[user.first_name])
-        except Exception as e:
-            print(f"Erreur lecture JSON: {e}")
-
-    # Remove duplicates
-    accessible_users = list(set(accessible_users))
+    accessible_users = _get_accessible_entretiens(user)
 
     # Use exact match for entretien field with accessible_users
     prefix_filters = Q(entretien__in=accessible_users)
@@ -174,6 +148,47 @@ def delete_astreinte(request, id_astreinte):
     astreinte = get_object_or_404(Astreinte, id_astreinte=id_astreinte)
     astreinte.delete()
     messages.success(request, "L'astreinte a été supprimée avec succès.")
+    return redirect(reverse('view_astreintes'))
+
+
+def _get_accessible_entretiens(user):
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
+        accessible_users = [user.username] + delegated_users
+    else:
+        accessible_users = [user.first_name]
+
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    return list(set(accessible_users))
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_astreintes_by_entretien(request):
+    entretien = request.POST.get('entretien', '')
+    accessible_entretiens = _get_accessible_entretiens(request.user)
+
+    if not entretien or entretien not in accessible_entretiens:
+        messages.error(request, "Vous n'avez pas accès à cet entretien.")
+        return redirect(reverse('view_astreintes'))
+
+    deleted_count, _ = Astreinte.objects.filter(entretien=entretien).delete()
+    if deleted_count:
+        messages.success(request, f"{deleted_count} astreinte(s) supprimée(s) pour l'entretien {entretien}.")
+    else:
+        messages.info(request, f"Aucune astreinte trouvée pour l'entretien {entretien}.")
     return redirect(reverse('view_astreintes'))
 
 

@@ -63,6 +63,7 @@ urlpatterns = [
     path('astreintes/', views.view_astreintes, name='view_astreintes'),
     path('astreinte/<int:id_astreinte>/modifier/', views.modify_astreinte, name='modify_astreinte'),
     path('astreinte/delete/<int:id_astreinte>/', views.delete_astreinte, name='delete_astreinte'),
+    path('astreintes/delete-by-entretien/', views.delete_astreintes_by_entretien, name='delete_astreintes_by_entretien'),
     path('get-technician-data/<int:technician_id>/', views.get_technician_data, name='get_technician_data'),
     path('manage-technicians/', views.ManageTechniciansView.as_view(), name='manage_technicians'),
     

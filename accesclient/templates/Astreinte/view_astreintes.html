@@ -1,5 +1,4 @@
 {% load my_filters %}
-{% include 'navbar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -243,6 +242,7 @@
     </style>
 </head>
 <body>
+    {% include 'navbar.html' %}
     <div class="container">
         <!-- Modern Filters Section -->
         <div class="filters-container">
@@ -281,8 +281,42 @@
                 </a>
                 <a href="/upload-excel/" class="btn btn-secondary">Importer</a>
                 <button type="button" onclick="location.reload();" class="btn btn-secondary">Rafraîchir</button>
+                {% if available_entretiens|length == 1 %}
+                <form method="POST" action="{% url 'delete_astreintes_by_entretien' %}" style="display:inline;" onsubmit="return confirm('Attention : cette action supprimera DÉFINITIVEMENT toutes vos astreintes. Continuer ?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="entretien" value="{{ available_entretiens.0 }}">
+                    <button type="submit" class="btn btn-secondary" style="background-color: #f44336; color: white;">
+                        <i class="fas fa-trash"></i> Supprimer tous les astreintes
+                    </button>
+                </form>
+                {% elif available_entretiens %}
+                <button type="button" class="btn btn-secondary" style="background-color: #f44336; color: white;" onclick="document.getElementById('delete-by-entretien-modal').style.display='flex';">
+                    <i class="fas fa-trash"></i> Supprimer tous les astreintes par entretien
+                </button>
+                {% endif %}
             </div>
         </div>
+
+        {% if available_entretiens|length > 1 %}
+        <div id="delete-by-entretien-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+            <div style="background:white; border-radius:8px; padding:20px; width:100%; max-width:400px;">
+                <h3 style="margin-top:0;">Supprimer toutes les astreintes d'un entretien</h3>
+                <form method="POST" action="{% url 'delete_astreintes_by_entretien' %}" onsubmit="return confirm('Attention : cette action supprimera DÉFINITIVEMENT toutes les astreintes de l\'entretien sélectionné. Continuer ?');">
+                    {% csrf_token %}
+                    <select name="entretien" class="form-control" style="width:100%; margin-bottom:15px;" required>
+                        <option value="">-- Choisir un entretien --</option>
+                        {% for entretien in available_entretiens %}
+                            <option value="{{ entretien }}">{{ entretien }}</option>
+                        {% endfor %}
+                    </select>
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('delete-by-entretien-modal').style.display='none';">Annuler</button>
+                        <button type="submit" class="btn" style="background-color:#f44336; color:white;">Supprimer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Compact Astreintes Cards -->
         {% for astreinte in astreintes %}

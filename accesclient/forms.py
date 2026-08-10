@@ -1,15 +1,43 @@
 # forms.py
 import re
+import os
+import json
 import pandas as pd
 from django import forms
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.conf import settings
 from .models import MessagesAscenseurs , ArchiveMessagesAscenseurs , Appareil , Astreinte , Repertoire, Alerte
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import connection
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
+
+
+def get_accessible_entretiens(user):
+    """Entretiens (agences) this user can see: their own tag, plus any delegated
+    to them as a Client via Appareil, plus any granted via access_config.json."""
+    if Appareil.objects.filter(Client=user.first_name).exists():
+        delegated_users = list(Appareil.objects.filter(
+            Client=user.first_name
+        ).values_list('Entretien', flat=True).distinct())
+        delegated_users = [entretien for entretien in delegated_users if entretien and entretien != 'PERDU']
+        accessible_users = [user.username] + delegated_users
+    else:
+        accessible_users = [user.first_name]
+
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_users.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    return list(set(accessible_users))
 
 class ExcelUploadForm(forms.Form):
     file = forms.FileField(
@@ -58,7 +86,7 @@ class MessageForm(forms.Form):
             ).values_list('Nature_de_l_appel', flat=True).distinct()
         else:
             choices = ArchiveMessagesAscenseurs.objects.filter(
-                entretien=user.first_name
+                entretien__in=get_accessible_entretiens(user)
             ).values_list('Nature_de_l_appel', flat=True).distinct()
         
         # Exclude 'Essai cabine' and choices starting with 'Relance'
@@ -87,7 +115,10 @@ class AppareilModificationForm(forms.ModelForm):
     Code_Postal = forms.CharField(required=True)
     Ville = forms.CharField(required=True)
     Résidence = forms.CharField(required=True)
-    
+    Observations = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}))
+    MES = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'))
+    RES = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'))
+
     def __init__(self, *args, **kwargs):
         clients = kwargs.pop('clients', [])
         entretiens = kwargs.pop('entretiens', [])

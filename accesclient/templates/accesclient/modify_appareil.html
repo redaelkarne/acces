@@ -1,117 +1,244 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if is_creating %}Ajouter un Appareil{% else %}Modifier Appareil{% endif %}</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #6a1b9a;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        form {
+        .form-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            max-height: 80vh;
-            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e1e4e8;
         }
 
-        form p {
-            margin-bottom: 20px;
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
         }
 
-        form label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #555;
+        .form-header h2 {
+            color: #2c3e50;
+            font-size: 1.6rem;
+            font-weight: 600;
         }
 
-        form input,
-        form select,
-        form textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
+        .form-header h2 i {
+            color: #6a1b9a;
+            margin-right: 10px;
         }
 
-        form input:focus,
-        form select:focus,
-        form textarea:focus {
-            border-color: #6a1b9a;
-            outline: none;
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6a1b9a;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 14px;
+            border: 1px solid #6a1b9a;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        form input[type="datetime-local"] {
-            padding: 8px;
-        }
-
-        button {
+        .back-link:hover {
             background-color: #6a1b9a;
             color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            margin-top: 10px;
         }
 
-        button:hover {
+        .section-title {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6a1b9a;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03rem;
+            margin: 10px 0 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-grid p {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-container form label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            background-color: white;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #6a1b9a;
+            box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            grid-column: 1 / -1;
+        }
+
+        button[type="submit"] {
+            background-color: #6a1b9a;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button[type="submit"]:hover {
             background-color: #4a148c;
         }
 
+        button[type="submit"]:active {
+            transform: translateY(1px);
+        }
+
         .errorlist {
-            color: red;
-            margin-top: -10px;
-            margin-bottom: 15px;
-        }
-
-        .errorlist ul {
+            color: #dc3545;
+            list-style: none;
             padding: 0;
-            list-style-type: none;
+            margin: 5px 0 0;
+            font-size: 0.85rem;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            form {
+            .form-container {
+                margin: 20px;
                 padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .form-header h2 {
+                font-size: 1.4rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>{% if is_creating %}Ajouter un Appareil{% else %}Modifier Appareil{% endif %}</h1>
-        <form method="post">
+    {% include 'navbar.html' %}
+    <div class="form-container">
+        <div class="form-header">
+            <h2>
+                <i class="fas {% if is_creating %}fa-plus-circle{% else %}fa-edit{% endif %}"></i>
+                {% if is_creating %}Ajouter un Appareil{% else %}Modifier Appareil{% endif %}
+            </h2>
+            <a href="{% url 'appareil_list' %}" class="back-link"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+        </div>
+
+        <form method="post" class="form-grid">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">{% if is_creating %}Créer{% else %}Enregistrer{% endif %}</button>
+            {% for field in form %}
+                {% if field.name == 'Client' %}
+                    <p class="section-title"><i class="fas fa-id-card"></i> Identification</p>
+                {% elif field.name == 'Adresse' %}
+                    <p class="section-title"><i class="fas fa-map-marker-alt"></i> Localisation</p>
+                {% elif field.name == 'Informations' %}
+                    <p class="section-title"><i class="fas fa-cogs"></i> Détails techniques</p>
+                {% endif %}
+                <p class="{% if field.name == 'Informations' or field.name == 'Observations' or field.name == 'Adresse' %}full-width{% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </p>
+            {% endfor %}
+
+            <div class="btn-container">
+                <button type="submit">{% if is_creating %}Créer{% else %}Enregistrer{% endif %}</button>
+            </div>
         </form>
     </div>
 </body>
