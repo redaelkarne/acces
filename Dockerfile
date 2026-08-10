@@ -18,5 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Regenerate hashed static files + manifest so WhiteNoise's
+# CompressedManifestStaticFilesStorage serves the current CSS/JS, not
+# whatever was baked into a previous image.
+RUN python manage.py collectstatic --noinput
+
 # Command to run the application
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
