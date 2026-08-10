@@ -100,5 +100,11 @@
         "LACROIX LYON",
         "LACROIX TOULOUSE",
         "LACROIX AUTRE"
+    ],
+     "FINSECUR": [
+        "FINSECUR LYON",
+        "FINSECUR PARIS",
+        "FINSECUR ROUEN",
+        "FINSECUR OUEST"
     ]
 }
