@@ -27,22 +27,31 @@ label {
 
 /* Table styles */
 table {
-    width: 120%; /* Adjust the width as needed */
-    margin: 1% auto;
-    margin-left: 4%;
+    width: 95%;
+    margin: 20px auto;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transform: scale(0.78); /* Scales the element to 80% of its original size */
-    transform-origin: top left; /* Keeps the scaling consistent with the top-left corner */
-    
+    font-size: 13px; /* Compact text instead of a visual-only transform: scale(),
+                         which left blank space below the table and let long
+                         content push the table past the viewport. */
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
-    white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Without a width limit, overflow-wrap never kicks in — the browser just grows
+   the column to fit unbroken content (e.g. a name padded with underscores)
+   instead of wrapping it. Cap every cell so any column with long free-text
+   content wraps; .Message above gets a wider allowance via higher specificity. */
+td {
+    max-width: 220px;
 }
 
 th {
@@ -50,9 +59,9 @@ th {
 }
 
 /* Specific table cell styles */
-td.message {
+td.Message {
     max-width: 400px; /* Set maximum width for the "Message" cells */
-    min-width: 300px; /* Set minimum width for the "Message" cells */
+    text-align: left;
 }
 tr:nth-child(even) {
     background-color: #b3b0b0; /* Grey background color for even rows */
@@ -127,18 +136,18 @@ tr:hover {
 }
 
 .dropbtn {
-    background-color: #800080;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
     margin-right: 10px;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 
 .dropbtn:hover, .apply-button:hover {
-    background-color: #8a4b8a;
+    background-color: var(--color-primary-dark, #4a148c);
 }
 
 .dropdown {
@@ -163,13 +172,13 @@ tr:hover {
 }
 
 .apply-button {
-    background-color: #be49be;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 .Excel-button {
     background-color: #007bff;
@@ -179,10 +188,13 @@ tr:hover {
     border: none;
     cursor: pointer;
     margin-left: 80px;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 .pagination {
-    margin-top: -4500px; /* Adjust this value as needed */
+    /* Note: this ruleset isn't currently applied — mesasc.html's pagination
+       markup doesn't carry the `pagination` class — kept here in case a future
+       template reuses it. The old `margin-top: -4500px` magic-number hack
+       (tuned to a since-changed table height) was removed. */
     display: flex;
     justify-content: center;
     list-style: none;

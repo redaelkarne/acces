@@ -46,6 +46,15 @@ th, td {
     text-align: center;
     white-space: normal; /* Empêche le texte de passer à la ligne suivante */
     overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Without a width limit, overflow-wrap never kicks in — the browser just grows
+   the column to fit unbroken content (e.g. a name padded with underscores)
+   instead of wrapping it. Cap every cell so any column with long free-text
+   content wraps; .Message below gets a wider allowance via higher specificity. */
+td {
+    max-width: 220px;
 }
 
 th {
@@ -117,17 +126,18 @@ tr:hover {
 }
 
 .dropbtn {
-    background-color: #800080;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
+    border-radius: var(--radius, 6px);
     margin-right: 10px;
 }
 
 .dropbtn:hover, .apply-button:hover {
-    background-color: #8a4b8a;
+    background-color: var(--color-primary-dark, #4a148c);
 }
 
 .dropdown {
@@ -152,13 +162,13 @@ tr:hover {
 }
 
 .apply-button {
-    background-color: #be49be;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-    
+    border-radius: var(--radius, 6px);
 }
 .Excel-button {
     background-color: #007bff;
@@ -168,7 +178,7 @@ tr:hover {
     border: none;
     cursor: pointer;
     margin-left: 80px;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 
 /* Pagination row in table footer */

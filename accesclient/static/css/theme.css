@@ -1,0 +1,19 @@
+/* Shared design tokens for the app. Loaded once via navbar.html so every page
+   that includes the navbar gets a consistent palette without duplicating it
+   in each page's own <style> block. */
+:root {
+    --color-primary: #6a1b9a;
+    --color-primary-dark: #4a148c;
+    --color-primary-light: #f5eefb;
+    --color-danger: #dc3545;
+    --color-danger-dark: #c82333;
+    --color-success: #28a745;
+    --color-success-dark: #218838;
+    --color-text: #333333;
+    --color-text-muted: #666666;
+    --color-border: #ced4da;
+    --color-bg-page: #f4f7f6;
+    --radius: 6px;
+    --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

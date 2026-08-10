@@ -64,8 +64,8 @@
         {% if page_obj.paginator.num_pages > 1 %}
         <ul style="display: flex; justify-content: center; list-style: none; padding: 0; margin: 0; flex-wrap: wrap; gap: 5px;">
             {% if page_obj.has_previous %}
-                <li><a href="?{% url_replace page=1 %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹‹ Première</a></li>
-                <li><a href="?{% url_replace page=page_obj.previous_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹ Préc.</a></li>
+                <li><a href="?{% url_replace page=1 %}" style="display: inline-block; padding: 5px 10px; background: var(--color-primary); color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹‹ Première</a></li>
+                <li><a href="?{% url_replace page=page_obj.previous_page_number %}" style="display: inline-block; padding: 5px 10px; background: var(--color-primary); color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">‹ Préc.</a></li>
             {% endif %}
 
             {% for num in page_obj.paginator.page_range %}
@@ -79,8 +79,8 @@
             {% endfor %}
 
             {% if page_obj.has_next %}
-                <li><a href="?{% url_replace page=page_obj.next_page_number %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Suiv. ›</a></li>
-                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}" style="display: inline-block; padding: 5px 10px; background: #800080; color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Dernière ››</a></li>
+                <li><a href="?{% url_replace page=page_obj.next_page_number %}" style="display: inline-block; padding: 5px 10px; background: var(--color-primary); color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Suiv. ›</a></li>
+                <li><a href="?{% url_replace page=page_obj.paginator.num_pages %}" style="display: inline-block; padding: 5px 10px; background: var(--color-primary); color: white; text-decoration: none; border-radius: 3px; font-size: 12px;">Dernière ››</a></li>
             {% endif %}
         </ul>
         {% endif %}

@@ -41,7 +41,16 @@ th, td {
     border: 1px solid #ddd;
     padding: 1px;
     text-align: center;
-    white-space: wrap; /* Empêche le texte de passer à la ligne suivante */
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Without a width limit, overflow-wrap never kicks in — the browser just grows
+   the column to fit unbroken content instead of wrapping it. Cap every cell so
+   any column with long free-text content wraps instead of stretching the table. */
+td {
+    max-width: 220px;
 }
 
 th {
@@ -113,17 +122,17 @@ tr:hover {
 }
 
 .dropbtn {
-    background-color: #800080;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
     margin-right: 10px;
 }
 .dropbtn:hover, .apply-button:hover {
-    background-color: #8a4b8a;
+    background-color: var(--color-primary-dark, #4a148c);
 }
 
 
@@ -149,13 +158,13 @@ tr:hover {
 }
 
 .apply-button {
-    background-color: #be49be;
+    background-color: var(--color-primary, #6a1b9a);
     color: white;
     padding: 10px 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 .Excel-button {
     background-color: #007bff;
@@ -165,7 +174,7 @@ tr:hover {
     border: none;
     cursor: pointer;
     margin-left: 60px;
-    border-radius: 5px;
+    border-radius: var(--radius, 6px);
 }
 .pagination {
     display: flex;
@@ -184,6 +193,7 @@ tr:hover {
     align-items: center;
     gap: 3px;
     padding: 3px !important;
+    max-width: none; /* buttons, not free text — don't clamp with the general td rule */
 }
 
 .actions-cell form {

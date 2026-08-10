@@ -53,7 +53,7 @@
         }
 
         .form-control:focus {
-            border-color: #4a90e2;
+            border-color: var(--color-primary);
         }
 
         .btn {
@@ -69,12 +69,12 @@
         }
 
         .btn-primary {
-            background-color: #4a90e2;
+            background-color: var(--color-primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: #357ab8;
+            background-color: var(--color-primary-dark);
         }
 
         .btn-secondary {
@@ -98,11 +98,11 @@
         }
         
         .card-header {
-            background-color: #0066cc;
+            background-color: var(--color-primary);
             color: white;
             padding: 8px 15px; /* Reduced padding */
             font-weight: 600;
-            border-bottom: 1px solid #0055aa;
+            border-bottom: 1px solid var(--color-primary-dark);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -371,7 +371,7 @@
                             {% if astreinte.type1 %}
                                 <span class="contact-badge">
                                     <span class="contact-number">1</span>
-                                    {% if astreinte.type1|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type1|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {% if astreinte.type1|is_phone %}<i class="fas fa-phone" style="color: var(--color-primary); margin-right: 4px;"></i>{% elif astreinte.type1|is_email %}<i class="fas fa-envelope" style="color: var(--color-primary); margin-right: 4px;"></i>{% endif %}
                                     {{ astreinte.media1 }}
                                 </span>
                             {% endif %}
@@ -379,7 +379,7 @@
                             {% if astreinte.type2 and astreinte.media2 %}
                                 <span class="contact-badge">
                                     <span class="contact-number">2</span>
-                                    {% if astreinte.type2|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type2|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {% if astreinte.type2|is_phone %}<i class="fas fa-phone" style="color: var(--color-primary); margin-right: 4px;"></i>{% elif astreinte.type2|is_email %}<i class="fas fa-envelope" style="color: var(--color-primary); margin-right: 4px;"></i>{% endif %}
                                     {{ astreinte.media2 }}
                                 </span>
                             {% endif %}
@@ -387,7 +387,7 @@
                             {% if astreinte.type3 and astreinte.media3 %}
                                 <span class="contact-badge">
                                     <span class="contact-number">3</span>
-                                    {% if astreinte.type3|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type3|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {% if astreinte.type3|is_phone %}<i class="fas fa-phone" style="color: var(--color-primary); margin-right: 4px;"></i>{% elif astreinte.type3|is_email %}<i class="fas fa-envelope" style="color: var(--color-primary); margin-right: 4px;"></i>{% endif %}
                                     {{ astreinte.media3 }}
                                 </span>
                             {% endif %}
@@ -395,7 +395,7 @@
                             {% if astreinte.type4 and astreinte.media4 %}
                                 <span class="contact-badge">
                                     <span class="contact-number">4</span>
-                                    {% if astreinte.type4|is_phone %}<i class="fas fa-phone" style="color: #4a90e2; margin-right: 4px;"></i>{% elif astreinte.type4|is_email %}<i class="fas fa-envelope" style="color: #4a90e2; margin-right: 4px;"></i>{% endif %}
+                                    {% if astreinte.type4|is_phone %}<i class="fas fa-phone" style="color: var(--color-primary); margin-right: 4px;"></i>{% elif astreinte.type4|is_email %}<i class="fas fa-envelope" style="color: var(--color-primary); margin-right: 4px;"></i>{% endif %}
                                     {{ astreinte.media4 }}
                                 </span>
                             {% endif %}

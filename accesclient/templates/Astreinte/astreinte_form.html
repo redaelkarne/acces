@@ -88,8 +88,8 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1);
         }
         
         /* Select dropdown styling */
@@ -116,7 +116,7 @@
         
         /* Submit button styling */
         button[type="submit"] {
-            background-color: #4a90e2;
+            background-color: var(--color-primary);
             color: white;
             padding: 12px 24px;
             border: none;
@@ -130,7 +130,7 @@
         }
         
         button[type="submit"]:hover {
-            background-color: #357ab8;
+            background-color: var(--color-primary-dark);
         }
         
         button[type="submit"]:active {
@@ -170,7 +170,7 @@
 <body>
     {% include 'navbar.html' %}
     <div class="form-container">
-        <h2><i class="fas fa-plus-circle" style="color: #4a90e2; margin-right: 10px;"></i>Créer une nouvelle astreinte</h2>
+        <h2><i class="fas fa-plus-circle" style="color: var(--color-primary); margin-right: 10px;"></i>Créer une nouvelle astreinte</h2>
         <form method="POST" class="form-grid">
             {% csrf_token %}
             
