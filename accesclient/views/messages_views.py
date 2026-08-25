@@ -148,23 +148,8 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             except Exception as e:
                 print(f"Erreur lecture JSON: {e}")
 
-        # 2. Get entretiens list (always needed for dropdown)
-        is_client = Appareil.objects.filter(Client=user.first_name).exists()
-        if is_client:
-            # For clients, get entretiens from all available messages
-            all_messages = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
-            entretiens = list(all_messages.values_list('entretien', flat=True).distinct())
-        else:
-            # For maintenance users, use accessible_accounts to ensure dropdown always appears
-            entretiens = sorted(list(set(accessible_accounts)))
-        
-        # 3. Fetch messages for the user based on user type
-        if is_client:
-            messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
-        else:
-            messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
-        
-        # 4. Apply date range filter
+        # 2. Parse date range filter (computed early so the entretien dropdown
+        # below can reuse it instead of scanning the full archive history)
         if start_date_str and end_date_str:
             start_date = parse_date(start_date_str)
             end_date = parse_date(end_date_str)
@@ -178,10 +163,29 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             end_date = parse_date(end_date_str)
             print(f"Date filter: beginning to {end_date_str}")
         else:
-            # Default to the last 24 hours
-            start_date = timezone.now() - timezone.timedelta(days=1)
+            # Default to the last 3 days
+            start_date = timezone.now() - timezone.timedelta(days=3)
             end_date = timezone.now()
-            print(f"Date filter: default 24h")
+            print(f"Date filter: default 3 days")
+
+        # 3. Get entretiens list (always needed for dropdown)
+        is_client = Appareil.objects.filter(Client=user.first_name).exists()
+        if is_client:
+            # For clients, get entretiens from messages within the current date
+            # window (was unbounded over the whole archive - full table scan)
+            all_messages = ArchiveMessagesAscenseurs.objects.filter(
+                Destinataire__in=accessible_accounts, Date__range=[start_date, end_date]
+            )
+            entretiens = list(all_messages.values_list('entretien', flat=True).distinct())
+        else:
+            # For maintenance users, use accessible_accounts to ensure dropdown always appears
+            entretiens = sorted(list(set(accessible_accounts)))
+
+        # 4. Fetch messages for the user based on user type
+        if is_client:
+            messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
+        else:
+            messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
 
         messages_list = messages_list.filter(Date__range=[start_date, end_date])
         print(f"Messages after date filter: {messages_list.count()}")
@@ -232,11 +236,14 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
         selected_columns = [field.name for field in ArchiveMessagesAscenseurs._meta.get_fields() if request.GET.get(field.name)]
         
         # Combine the content to create 'Résidence' for archive messages
+        # Bulk-fetch Appareils instead of one query per message (was N+1)
+        page_appareil_ids = {m.N_ID for m in page_obj if m.N_ID is not None}
+        page_appareils_by_id = {a.N_ID: a for a in Appareil.objects.filter(N_ID__in=page_appareil_ids)}
         for message in page_obj:
-            try:
-                appareil = Appareil.objects.get(N_ID=message.N_ID)
+            appareil = page_appareils_by_id.get(message.N_ID)
+            if appareil:
                 message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
-            except Appareil.DoesNotExist:
+            else:
                 message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
 
         # Handle export functionality
@@ -250,12 +257,15 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             export_columns.append('Résidence')
             
             # Prepare messages with Résidence field
-            export_list = messages_list
+            # Bulk-fetch Appareils instead of one query per message (was N+1)
+            export_list = list(messages_list)
+            export_appareil_ids = {m.N_ID for m in export_list if m.N_ID is not None}
+            export_appareils_by_id = {a.N_ID: a for a in Appareil.objects.filter(N_ID__in=export_appareil_ids)}
             for message in export_list:
-                try:
-                    appareil = Appareil.objects.get(N_ID=message.N_ID)
+                appareil = export_appareils_by_id.get(message.N_ID)
+                if appareil:
                     message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}, {appareil.Résidence}"
-                except Appareil.DoesNotExist:
+                else:
                     message.Résidence = f"{message.Adresse}, {message.Code_Postal}, {message.ville}"
             
             return self.export_to_csv(export_list, export_columns, custom_column_names)
