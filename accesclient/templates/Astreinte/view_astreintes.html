@@ -281,6 +281,9 @@
                 </a>
                 <a href="/upload-excel/" class="btn btn-secondary">Importer</a>
                 <button type="button" onclick="location.reload();" class="btn btn-secondary">Rafraîchir</button>
+                <a href="{% url 'create_astreinte' %}" class="btn btn-secondary" style="background-color: #4CAF50; color: white;">
+                    <i class="fas fa-plus"></i> Créer une astreinte
+                </a>
                 {% if available_entretiens|length == 1 %}
                 <form method="POST" action="{% url 'delete_astreintes_by_entretien' %}" style="display:inline;" onsubmit="return confirm('Attention : cette action supprimera DÉFINITIVEMENT toutes vos astreintes. Continuer ?');">
                     {% csrf_token %}

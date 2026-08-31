@@ -1,0 +1,291 @@
+BASES DE DONNÉES CLIENTS À DATE
+NOMBRE DE MESSAGES TRAITÉS PAR MOIS
+Depuis le 01/01/2026
+================================================================================
+
+CLIENT : PHOENIX ASCENSEURS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :      105 messages
+--------------------------------------------------------------------------------
+TOTAL           :      105 messages
+
+CLIENT : FINSECUR
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       66 messages
+--------------------------------------------------------------------------------
+TOTAL           :       66 messages
+
+CLIENT : AXIANS FIBRE NORD
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       27 messages
+--------------------------------------------------------------------------------
+TOTAL           :       27 messages
+
+CLIENT : ECONOTRE
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        0 messages
+--------------------------------------------------------------------------------
+TOTAL           :        0 messages
+
+CLIENT : URGENCE GAZ
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       16 messages
+--------------------------------------------------------------------------------
+TOTAL           :       16 messages
+
+CLIENT : ASC ASCENSEURS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       87 messages
+--------------------------------------------------------------------------------
+TOTAL           :       87 messages
+
+CLIENT : TERRALYS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        0 messages
+--------------------------------------------------------------------------------
+TOTAL           :        0 messages
+
+CLIENT : EIFFAGE ENERGIE
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       24 messages
+--------------------------------------------------------------------------------
+TOTAL           :       24 messages
+
+CLIENT : ORVITA
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       35 messages
+--------------------------------------------------------------------------------
+TOTAL           :       35 messages
+
+CLIENT : CONNEX IT
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        5 messages
+--------------------------------------------------------------------------------
+TOTAL           :        5 messages
+
+CLIENT : OLEOLIFT
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :     1317 messages
+--------------------------------------------------------------------------------
+TOTAL           :     1317 messages
+
+CLIENT : ASCENSEURS 4A
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       29 messages
+--------------------------------------------------------------------------------
+TOTAL           :       29 messages
+
+CLIENT : 2AAZ ASCENSEURS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       72 messages
+--------------------------------------------------------------------------------
+TOTAL           :       72 messages
+
+CLIENT : KYO ASCENSEURS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :     3311 messages
+--------------------------------------------------------------------------------
+TOTAL           :     3311 messages
+
+CLIENT : EDENKIA
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        4 messages
+--------------------------------------------------------------------------------
+TOTAL           :        4 messages
+
+CLIENT : JD2M
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       21 messages
+--------------------------------------------------------------------------------
+TOTAL           :       21 messages
+
+CLIENT : SAMELIA
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        0 messages
+--------------------------------------------------------------------------------
+TOTAL           :        0 messages
+
+CLIENT : APPARAT
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        0 messages
+--------------------------------------------------------------------------------
+TOTAL           :        0 messages
+
+CLIENT : BUILDING ASCENSEURS
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :       72 messages
+--------------------------------------------------------------------------------
+TOTAL           :       72 messages
+
+CLIENT : AXCELIS SECURITE
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        0 messages
+--------------------------------------------------------------------------------
+TOTAL           :        0 messages
+
+CLIENT : SUEZ ORGANIQUE
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        2 messages
+--------------------------------------------------------------------------------
+TOTAL           :        2 messages
+
+CLIENT : EVONEO
+--------------------------------------------------------------------------------
+Janvier         :        0 messages
+Février         :        0 messages
+Mars            :        0 messages
+Avril           :        0 messages
+Mai             :        0 messages
+Juin            :        0 messages
+Juillet         :        0 messages
+Août            :        4 messages
+--------------------------------------------------------------------------------
+TOTAL           :        4 messages
+
