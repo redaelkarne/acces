@@ -30,6 +30,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='login'), name='home'),
     path('admin/', admin.site.urls),
     path('messages_ascenseurs/', views.MessagesView.as_view(), name='MessagesAscenseurs'),
+    path('messages_ascenseurs/archiver/', views.archive_messages, name='archive_pending_messages'),
     path('export-messages/', export_messages_to_excel, name='export_messages'),
     path('appareils/', AppareilView.as_view(), name='appareil_list'),
     path('export_appareils/', export_appareils_to_excel, name='export_appareils'),

@@ -129,20 +129,30 @@ tr:hover {
 }
 .button-container {
     display: flex;
-    align-items: left;
+    align-items: center;
     justify-content: left;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-top: 20px;
     margin-left: 80px;
+}
+
+/* Forms placed directly in the button row shouldn't create their own box —
+   their children (input/button/link) become flex items of .button-container
+   itself, so everything lines up on one baseline regardless of which form
+   wraps it. */
+.button-container > form {
+    display: contents;
 }
 
 .dropbtn {
     background-color: var(--color-primary, #6a1b9a);
     color: white;
-    padding: 10px 15px;
+    height: 42px;
+    padding: 0 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
-    margin-right: 10px;
     border-radius: var(--radius, 6px);
 }
 
@@ -174,7 +184,8 @@ tr:hover {
 .apply-button {
     background-color: var(--color-primary, #6a1b9a);
     color: white;
-    padding: 10px 15px;
+    height: 42px;
+    padding: 0 15px;
     font-size: 16px;
     border: none;
     cursor: pointer;
@@ -272,6 +283,32 @@ tr:hover {
     transition: all 0.3s ease;
 }
 
+.napp-search-input {
+    height: 42px;
+    padding: 0 15px;
+    border: 2px solid #ced4da;
+    border-radius: var(--radius, 6px);
+    font-size: 14px;
+    color: #495057;
+}
+
+.napp-search-input:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.napp-reset-link {
+    color: #007bff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.napp-reset-link:hover {
+    text-decoration: underline;
+}
+
 .entretien-select:hover {
     border-color: #80bdff;
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
@@ -311,10 +348,19 @@ tr:hover {
     }
 }
 
-.flash-red {
-    animation: flash-red-animation 1s infinite;
+.needs-attention-cell {
+    font-weight: 600;
+    animation: needs-attention-flash 1s infinite;
 }
-@keyframes flash-red-animation {
-    0%, 100% { background-color: transparent; }
-    50% { background-color: red; }
+@keyframes needs-attention-flash {
+    0%, 100% { background-color: transparent; color: inherit; }
+    50% { background-color: #e74c3c; color: #fff; }
+}
+
+.consigne-temporaire {
+    background: #fff3cd;
+    color: #856404;
+    font-weight: 600;
+    border-left: 4px solid #ffc107;
+    padding: 6px 10px !important;
 }

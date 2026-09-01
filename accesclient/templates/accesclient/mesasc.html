@@ -11,17 +11,25 @@
 </head>
 <body>
     {% include 'navbar.html' %}
-    
+
     <h1>Messages en cours</h1>
-    
+
+    {% if messages %}
+        <ul class="messages" style="list-style:none; padding:0; max-width:1200px; margin:10px auto;">
+            {% for message in messages %}
+                <li style="padding:10px 15px; margin-bottom:8px; border-radius:4px; {% if message.tags == 'error' %}background:#f8d7da; color:#721c24;{% elif message.tags == 'success' %}background:#d4edda; color:#155724;{% else %}background:#d1ecf1; color:#0c5460;{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <form action="{% url 'export_messages' %}" method="get">
         {% if selected_entretien %}
             <input type="hidden" name="entretien" value="{{ selected_entretien }}">
         {% endif %}
         <button type="submit" class="Excel-button">Télécharger les données</button>
     </form>
-
-
 
     {% if entretiens|length > 1 %}
     <div class="entretien-selector">
@@ -52,6 +60,26 @@
             </div>
         </div>
         <button onclick="applyFilters()" class="apply-button">Appliquer le filtre</button>
+
+        {% if is_kyo_account %}
+            <form method="GET" action="" class="napp-search-form">
+                {% if selected_entretien %}
+                    <input type="hidden" name="entretien" value="{{ selected_entretien }}">
+                {% endif %}
+                <input type="text" name="napp" value="{{ napp_search }}" placeholder="Rechercher par N°APP" class="napp-search-input">
+                <button type="submit" class="apply-button">Rechercher</button>
+                {% if napp_search %}
+                    <a href="?{% if selected_entretien %}entretien={{ selected_entretien }}{% endif %}" class="napp-reset-link">Réinitialiser</a>
+                {% endif %}
+            </form>
+
+            <form action="{% url 'archive_pending_messages' %}" method="post"
+                  onsubmit="return confirm('Archiver les messages traités de KYO ASCENSEURS ? Cette action est définitive.');">
+                {% csrf_token %}
+                <input type="hidden" name="destinataire" value="KYO ASCENSEURS">
+                <button type="submit" class="apply-button">Archiver</button>
+            </form>
+        {% endif %}
     </div>
 
     <!-- Pagination before table -->
@@ -101,10 +129,10 @@
         <tbody>
             <!-- Populate table body with data -->
             {% for message in messages_list %}
-                <tr class="{% if message.Action and 'RAPPORT OK' not in message.Action %}no-rapport-row{% endif %}">
+                <tr>
                     {% for field_name, verbose_name in custom_column_names.items %}
                         {% if field_name not in excluded_columns %}
-                            <td {% if field_name == 'Message' %} class="Message" {% endif %}>
+                            <td {% if field_name == 'Message' %} class="Message" {% elif field_name == 'Nature_de_l_appel' and message.needs_attention %} class="needs-attention-cell" {% elif field_name == 'Consigne_temporaire' and message.Consigne_temporaire %} class="consigne-temporaire" {% endif %}>
                                 {% if field_name == 'Message' %}
                                     {{ message|attr:"Message"|default:"" }}
                                 {% else %}
@@ -207,25 +235,11 @@
         });
         
     </script>
+    {% if is_kyo_account %}
     <script>
-        // document.addEventListener('DOMContentLoaded', function() {
-            // Select all rows without "OK RAPPORT" in the Action column
-           //  const noRapportRows = document.querySelectorAll('.no-rapport-row');
-            
-            // Function to toggle flashing
-            function toggleFlash() {
-            //     noRapportRows.forEach(row => {
-                //     row.classList.toggle('flash-red');
-              //   });
-          //   }
-                        }
-            
-           //  // Start flashing every 3 seconds if rows exist
-           //  if (noRapportRows.length > 0) {
-           //      toggleFlash(); // Initial flash
-            //     setInterval(toggleFlash, 8000); // Repeat every 3 seconds
-          //   }
-       //  });
-        </script>
+        // KYO ASCENSEURS: keep the list current without a manual reload.
+        setTimeout(function() { window.location.reload(); }, 30000);
+    </script>
+    {% endif %}
 </body>
 </html>

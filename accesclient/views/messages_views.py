@@ -1,13 +1,18 @@
 # messages_views.py
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from django.core.cache import cache
+from django.contrib import messages as django_messages
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from io import BytesIO
@@ -19,6 +24,20 @@ from django.conf import settings
 
 from ..models import MessagesAscenseurs, MessagesAscenseursDetails, ArchiveMessagesAscenseurs, Appareil
 from ..forms import MessageDetailForm, MessageForm
+
+
+def _get_accessible_accounts(user):
+    accessible_accounts = [user.first_name]
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if user.first_name in config:
+                    accessible_accounts.extend(config[user.first_name])
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+    return [acc for acc in set(accessible_accounts) if acc and acc != 'PERDU']
 
 
 class MessagesView(LoginRequiredMixin, View):
@@ -50,24 +69,40 @@ class MessagesView(LoginRequiredMixin, View):
         else:
             # For maintenance users, show messages where entretien matches OR is null/empty
             messages_list = MessagesAscenseursDetails.objects.filter(
-                Q(entretien__in=accessible_accounts) | 
-                Q(entretien__isnull=True) | 
+                Q(entretien__in=accessible_accounts) |
+                Q(entretien__isnull=True) |
                 Q(entretien='')
             )
 
+        # KYO ASCENSEURS-specific behavior (sort order, auto-refresh, archive
+        # button) is keyed off the account itself, not the "entretien" GET
+        # filter: real Destinataire is always 'KYO ASCENSEURS', while the
+        # entretien field only ever holds the sub-agency ('KYO ASC 4', ...),
+        # so a selected sub-agency should still count as "viewing KYO".
+        is_kyo_account = is_client and 'KYO ASCENSEURS' in accessible_accounts
+
         # Use the accessible accounts directly so the selector matches bdd/archives behavior
         entretiens = sorted(accessible_accounts)
-        
+
         # Get the selected "Entretien" from GET parameters
         selected_entretien = request.GET.get('entretien')
 
         # Filter messages based on selected "Entretien"
         if selected_entretien:
             messages_list = messages_list.filter(entretien=selected_entretien)
-        
-        # Order by date descending (most recent first)
-        messages_list = messages_list.order_by('-Date')
-        
+
+        # KYO ASCENSEURS wants to search their list by N°APP (code_client).
+        napp_search = request.GET.get('napp', '').strip() if is_kyo_account else ''
+        if napp_search:
+            messages_list = messages_list.filter(code_client__icontains=napp_search)
+
+        # KYO ASCENSEURS wants oldest-first ordering; everyone else keeps the
+        # default most-recent-first.
+        if is_kyo_account:
+            messages_list = messages_list.order_by('Date')
+        else:
+            messages_list = messages_list.order_by('-Date')
+
         # Pagination
         paginator = Paginator(messages_list, 50)  # Show 50 messages per page
         page_number = request.GET.get('page')
@@ -83,6 +118,7 @@ class MessagesView(LoginRequiredMixin, View):
             'Code_Postal': 'Code Postal',
             'ville': 'Ville',
             'Résidence': 'Résidence',
+            'Consigne_temporaire': 'Consigne Temporaire',
             'Message': 'Message',
             'Action': 'Action',
             'Nom': 'Nom',
@@ -95,18 +131,35 @@ class MessagesView(LoginRequiredMixin, View):
             'Observations': 'Observations',
         }
 
-        # Get Résidence from Appareil model
+        # Nature_de_l_appel values that are routine/informational (they never
+        # represent an open elevator problem) and shouldn't be flagged.
+        routine_natures = {'Rapport intervention', 'Essai cabine', 'Demande renseignement'}
+
+        # Get Résidence / Consigne Temporaire from Appareil model
         for message in page_obj:
-            try:
-                appareil = Appareil.objects.get(N_ID=message.N_ID)
-                message.Résidence = appareil.Résidence if appareil.Résidence else "--"
-            except Appareil.DoesNotExist:
-                message.Résidence = "--"
+            appareil = Appareil.objects.filter(N_ID=message.N_ID).first()
+            message.Résidence = appareil.Résidence if appareil and appareil.Résidence else "--"
+            # KYO ASCENSEURS wants any standing "Consigne Temporaire" on the
+            # elevator (e.g. out-of-service notice) surfaced next to its messages.
+            message.Consigne_temporaire = (
+                appareil.Consigne_volatile
+                if appareil and message.Destinataire == 'KYO ASCENSEURS' and appareil.Consigne_volatile
+                else ''
+            )
+            # KYO ASCENSEURS wants every non-routine message flagged for as
+            # long as it stays in this list: 'CLOTURE' in Action only means
+            # ASTUS finished handling the call, not that the elevator issue
+            # itself is fixed, so it isn't used to clear the flag. A message
+            # stops being flagged only once it's archived off this list.
+            message.needs_attention = bool(
+                message.Destinataire == 'KYO ASCENSEURS'
+                and message.Nature_de_l_appel not in routine_natures
+            )
         
         selected_columns = [field_name for field_name in messages.get_fields() if request.GET.get(field_name)]
 
         return render(request, 'accesclient/mesasc.html', {
-            'messages': messages,
+            'message_model': messages,
             'messages_list': page_obj,
             'page_obj': page_obj,
             'selected_columns': selected_columns,
@@ -114,6 +167,9 @@ class MessagesView(LoginRequiredMixin, View):
             'custom_column_names': custom_column_names,
             'entretiens': entretiens,
             'selected_entretien': selected_entretien,
+            'is_client': is_client,
+            'is_kyo_account': is_kyo_account,
+            'napp_search': napp_search,
         })
 
 
@@ -497,3 +553,84 @@ def export_messages_to_excel(request):
     wb.save(response)
 
     return response
+
+
+@login_required
+@require_http_methods(["POST"])
+def archive_messages(request):
+    """Archive the resolved messages of one account (e.g. 'KYO ASCENSEURS'):
+    move them from MessagesAscenseurs into ArchiveMessagesAscenseurs and
+    remove them from the working list, mirroring the old "Archiver" button.
+    """
+    destinataire = request.POST.get('destinataire', '').strip()
+    accessible_accounts = _get_accessible_accounts(request.user)
+
+    is_client = Appareil.objects.filter(Client=request.user.first_name).exists()
+    if not is_client or not destinataire or destinataire not in accessible_accounts:
+        django_messages.error(request, "Vous n'avez pas accès à ce compte.")
+        return redirect(reverse('MessagesAscenseurs'))
+
+    # A message is considered resolved (archivable) unless it still needs
+    # follow-up (attention/incarcération/panne/dysfonctionnement) and hasn't
+    # been marked OK, or it's still awaiting confirmation/stock/sonnette handling.
+    needs_follow_up = (
+        Q(Nature_de_l_appel__iendswith='ention')
+        | Q(Nature_de_l_appel__iendswith='arceration')
+        | Q(Nature_de_l_appel__iendswith='anne')
+        | Q(Nature_de_l_appel__iendswith='nctionnement')
+    )
+
+    candidates = MessagesAscenseurs.objects.filter(
+        Destinataire=destinataire,
+        ConfIncar__isnull=True,
+    ).exclude(
+        Action__istartswith='Stock'
+    ).exclude(
+        Action__istartswith='Sonn'
+    ).filter(~needs_follow_up | Q(Autres2='OK'))
+
+    with transaction.atomic():
+        rows = list(candidates)
+        if rows:
+            ArchiveMessagesAscenseurs.objects.bulk_create([
+                ArchiveMessagesAscenseurs(
+                    N_des_messages=r.N_des_messages,
+                    N_ID=r.N_ID,
+                    Destinataire=r.Destinataire,
+                    Date=r.Date,
+                    Message=r.Message,
+                    Nom=r.Nom,
+                    Téléphone=r.Téléphone,
+                    Digicode=r.Digicode,
+                    Action=r.Action,
+                    Nom_de_l_appelant=r.Nom_de_l_appelant,
+                    Société_de_l_appelant=r.Société_de_l_appelant,
+                    Adresse_de_l_appelant=r.Adresse_de_l_appelant,
+                    Code_postal_de_l_appelant=r.Code_postal_de_l_appelant,
+                    Ville_de_l_appelant=r.Ville_de_l_appelant,
+                    Téléphone_de_l_appelant=r.Téléphone_de_l_appelant,
+                    Digicode_de_l_appelant=r.Digicode_de_l_appelant,
+                    Nature_de_l_appel=r.Nature_de_l_appel,
+                    Stocké=r.Stocké,
+                    Incarcération=r.Incarcération,
+                    Opérateur=r.Opérateur,
+                    Téléphone_2=r.Téléphone_2,
+                    Confirmation=r.Confirmation,
+                    ConfIncar=r.ConfIncar,
+                    ConfIncar2=r.ConfIncar2,
+                    Commentaires=r.Commentaires,
+                    Autres1=r.Autres1,
+                    Autres2=r.Autres2,
+                    Etat=r.Etat,
+                ) for r in rows
+            ])
+            MessagesAscenseurs.objects.filter(
+                N_des_messages__in=[r.N_des_messages for r in rows]
+            ).delete()
+
+    if rows:
+        django_messages.success(request, f"{len(rows)} message(s) archivé(s) pour {destinataire}.")
+    else:
+        django_messages.info(request, f"Aucun message à archiver pour {destinataire}.")
+
+    return redirect(f"{reverse('MessagesAscenseurs')}?entretien={destinataire}")
