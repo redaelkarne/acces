@@ -176,6 +176,10 @@ class MessagesView(LoginRequiredMixin, View):
 class ArchiveMessagesView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user = request.user
+        # Login "astus" (the account whose Nom/last_name is "astus") gets
+        # unrestricted access to every client in the archive instead of the
+        # usual access_config.json-scoped list.
+        has_full_client_access = (user.last_name or '').strip().lower() == 'astus'
         messages = ArchiveMessagesAscenseurs.objects.first()
 
         # Retrieve filter parameters
@@ -225,20 +229,36 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             print(f"Date filter: default 3 days")
 
         # 3. Get entretiens list (always needed for dropdown)
-        is_client = Appareil.objects.filter(Client=user.first_name).exists()
-        if is_client:
-            # For clients, get entretiens from messages within the current date
-            # window (was unbounded over the whole archive - full table scan)
-            all_messages = ArchiveMessagesAscenseurs.objects.filter(
-                Destinataire__in=accessible_accounts, Date__range=[start_date, end_date]
-            )
-            entretiens = list(all_messages.values_list('entretien', flat=True).distinct())
+        if has_full_client_access:
+            # Every distinct Client and Entretien on record (a Client such as
+            # "Clauger" can have several Entretien sub-agencies, and either
+            # kind of name should be pickable from the dropdown). Sourced from
+            # the small Appareil master table (not the much larger archive
+            # history table, which would need an unbounded full-table scan
+            # for DISTINCT entretien).
+            entretiens = sorted({
+                e for e in list(Appareil.objects.values_list('Client', flat=True).distinct()) +
+                           list(Appareil.objects.values_list('Entretien', flat=True).distinct())
+                if e and e != 'PERDU'
+            })
+            is_client = False
         else:
-            # For maintenance users, use accessible_accounts to ensure dropdown always appears
-            entretiens = sorted(list(set(accessible_accounts)))
+            is_client = Appareil.objects.filter(Client=user.first_name).exists()
+            if is_client:
+                # For clients, get entretiens from messages within the current date
+                # window (was unbounded over the whole archive - full table scan)
+                all_messages = ArchiveMessagesAscenseurs.objects.filter(
+                    Destinataire__in=accessible_accounts, Date__range=[start_date, end_date]
+                )
+                entretiens = list(all_messages.values_list('entretien', flat=True).distinct())
+            else:
+                # For maintenance users, use accessible_accounts to ensure dropdown always appears
+                entretiens = sorted(list(set(accessible_accounts)))
 
         # 4. Fetch messages for the user based on user type
-        if is_client:
+        if has_full_client_access:
+            messages_list = ArchiveMessagesAscenseurs.objects.all()
+        elif is_client:
             messages_list = ArchiveMessagesAscenseurs.objects.filter(Destinataire__in=accessible_accounts)
         else:
             messages_list = ArchiveMessagesAscenseurs.objects.filter(entretien__in=accessible_accounts)
@@ -248,7 +268,15 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
 
         # 5. Filter messages based on selected "Entretien"
         if selected_entretien:
-            messages_list = messages_list.filter(entretien=selected_entretien)
+            if has_full_client_access:
+                # selected_entretien may be a Client name (e.g. "Clauger") that
+                # covers several Entretien sub-agencies, or an Entretien name
+                # directly - match messages tagged either way.
+                delegated = Appareil.objects.filter(Client=selected_entretien).values_list('Entretien', flat=True).distinct()
+                match_values = {selected_entretien} | {e for e in delegated if e and e != 'PERDU'}
+                messages_list = messages_list.filter(Q(entretien__in=match_values) | Q(Destinataire__in=match_values))
+            else:
+                messages_list = messages_list.filter(entretien=selected_entretien)
             print(f"Filtering by entretien: {selected_entretien}, count: {messages_list.count()}")
 
         # 6. Search functionality
@@ -338,6 +366,7 @@ class ArchiveMessagesView(LoginRequiredMixin, View):
             'entretiens': entretiens,
             'selected_entretien': selected_entretien or '',
             'search_query': search_query or '',
+            'has_full_client_access': has_full_client_access,
         })
 
     def export_to_csv(self, messages_list, export_columns, custom_column_names):

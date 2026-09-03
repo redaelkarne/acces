@@ -30,12 +30,22 @@
                 {% if entretiens %}
                 <div class="filter-group">
                     <label for="entretien-selector" class="filter-label" style="font-weight: 600; display: block; margin-bottom: 5px;">Entretien:</label>
-                    <select name="entretien" id="entretien-selector" class="filter-select" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px; min-width: 150px;">
-                        <option value="">-- Tous --</option>
-                        {% for entretien in entretiens %}
-                            <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
-                        {% endfor %}
-                    </select>
+                    {% if has_full_client_access %}
+                        <!-- Full client list (astus login): searchable autocomplete instead of a long scrolling select -->
+                        <input type="text" name="entretien" id="entretien-selector" class="filter-input" list="entretien-list" value="{{ selected_entretien }}" placeholder="-- Tous --" autocomplete="off" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px; min-width: 200px;">
+                        <datalist id="entretien-list">
+                            {% for entretien in entretiens %}
+                                <option value="{{ entretien }}">
+                            {% endfor %}
+                        </datalist>
+                    {% else %}
+                        <select name="entretien" id="entretien-selector" class="filter-select" style="padding: 8px 12px; border: 2px solid #ced4da; border-radius: 4px; min-width: 150px;">
+                            <option value="">-- Tous --</option>
+                            {% for entretien in entretiens %}
+                                <option value="{{ entretien }}" {% if entretien == selected_entretien %}selected{% endif %}>{{ entretien }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
                 </div>
                 {% endif %}
 
@@ -95,7 +105,11 @@
             
             const entretienSelect = document.getElementById('entretien-selector');
             if (entretienSelect) {
-                entretienSelect.selectedIndex = 0;
+                if (entretienSelect.tagName === 'SELECT') {
+                    entretienSelect.selectedIndex = 0;
+                } else {
+                    entretienSelect.value = '';
+                }
             }
             
             // Redirect to base URL without any parameters
