@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 import json
 import os
 from django.conf import settings
@@ -73,5 +73,19 @@ def manage_access_config(request):
     context = {
         'config': sorted_config,
     }
-    
+
     return render(request, 'accesclient/manage_access_config.html', context)
+
+
+@staff_member_required
+def download_access_config(request):
+    """Download the raw access_config.json file"""
+    json_path = os.path.join(settings.BASE_DIR, 'access_config.json')
+    if not os.path.exists(json_path):
+        raise Http404("Le fichier access_config.json n'existe pas.")
+    return FileResponse(
+        open(json_path, 'rb'),
+        as_attachment=True,
+        filename='access_config.json',
+        content_type='application/json',
+    )

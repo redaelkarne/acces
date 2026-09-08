@@ -223,6 +223,12 @@
     <div class="container">
         <h1>Gestion des Accès ASTUS</h1>
 
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a href="{% url 'download_access_config' %}" class="btn btn-primary">
+                Télécharger le JSON
+            </a>
+        </div>
+
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}

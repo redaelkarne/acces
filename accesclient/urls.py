@@ -77,5 +77,6 @@ urlpatterns = [
     
     # Access config management (staff only)
     path('gestion-acces/', views.manage_access_config, name='manage_access_config'),
+    path('gestion-acces/download/', views.download_access_config, name='download_access_config'),
     
 ]

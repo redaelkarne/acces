@@ -51,7 +51,7 @@ rgb(216, 16, 183)
     bottom: -80px;
 }
 form{
-    height: 520px;
+    min-height: 520px;
     width: 400px;
     background-color: rgba(255,255,255,0.13);
     position: absolute;
@@ -163,27 +163,21 @@ button{
   </div>
   {% endif %}
 
-  <div class="container">
-      <div class="left-half">
-          <div class="background">
-              <div class="shape"></div>
-              <div class="shape"></div>
-          </div>
-      </div>
-      <div class="right-half">
-          <div class="login-container">
-              
-              <h2>Login</h2>
-              {% if messages %}
-              <ul class="messages" style="list-style: none; padding: 0; margin-bottom: 20px; text-align: center;">
-                  {% for message in messages %}
-                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: #ff4444; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 4px;">{{ message }}</li>
-                  {% endfor %}
-              </ul>
-              {% endif %}
-              {% block content %}
-              
-              <form method="post" action="{% url 'login' %}">
+  <div class="background">
+      <div class="shape"></div>
+      <div class="shape"></div>
+  </div>
+
+  {% if messages %}
+  <ul class="messages" style="list-style: none; padding: 0; margin-bottom: 20px; text-align: center;">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: #ff4444; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 4px;">{{ message }}</li>
+      {% endfor %}
+  </ul>
+  {% endif %}
+  {% block content %}
+
+  <form method="post" action="{% url 'login' %}">
                 <img src="{% static 'css/accessclient/images/ASTUS_logo.jpg' %}" alt="ASTUS Logo" class="logo" style="display: block; margin: 0 auto;">
                   {% csrf_token %}
                   
@@ -198,10 +192,11 @@ button{
                   <div style="text-align: center; margin-top: 15px;">
                       <a href="{% url 'password_reset' %}" style="color: #ffffff; text-decoration: none; font-size: 14px;">Mot de passe oublié ?</a>
                   </div>
+                  <div style="text-align: center; margin-top: 10px;">
+                      <a href="{% static 'docs/guide_utilisateur_astus_acces.pdf' %}" target="_blank" rel="noopener" style="color: #ffffff; text-decoration: none; font-size: 14px;">
+                          <i class="fas fa-book"></i> Guide d'utilisation
+                      </a>
+                  </div>
               </form>
-              {% endblock %}
-              
-          </div>
-      </div>
-  </div>
+  {% endblock %}
 </html>
