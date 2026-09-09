@@ -119,12 +119,23 @@ class AppareilModificationForm(forms.ModelForm):
     MES = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'))
     RES = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'))
 
+    # MEDITRAX used a legacy add/modify form with different labels for the
+    # same underlying fields; keep matching that naming for MEDITRAX only.
+    MEDITRAX_LABELS = {
+        'Code_Client': 'Référence Client',
+        'Résidence': 'Nom Client / Type Habitation',
+        'Informations': 'Equipement',
+        'Phonie': 'Ligne Equipement',
+        'Observations': 'Date de naissance + Telephone Client',
+    }
+
     def __init__(self, *args, **kwargs):
         clients = kwargs.pop('clients', [])
         entretiens = kwargs.pop('entretiens', [])
         types = kwargs.pop('types', [])
+        is_meditrax = kwargs.pop('is_meditrax', False)
         super().__init__(*args, **kwargs)
-        
+
         if clients:
             self.fields['Client'].choices = [(c, c) for c in clients]
         if entretiens:
@@ -132,12 +143,17 @@ class AppareilModificationForm(forms.ModelForm):
             self.fields['Destinataire'].choices = [(e, e) for e in entretiens]
         if types:
             self.fields['Type'].choices = [('', '-- Sélectionner un type --')] + [(t, t) for t in types]
-        
+
         # Make other fields optional
         optional_fields = ['Informations', 'Incarcération', 'Type', 'Phonie', 'Transmetteur', 'Observations', 'Consigne_volatile', 'MES', 'RES']
         for field_name in optional_fields:
             if field_name in self.fields:
                 self.fields[field_name].required = False
+
+        if is_meditrax:
+            for field_name, label in self.MEDITRAX_LABELS.items():
+                if field_name in self.fields:
+                    self.fields[field_name].label = label
     
     class Meta:
         model = Appareil

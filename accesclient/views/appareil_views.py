@@ -176,26 +176,30 @@ def modify_appareil(request, id):
         ).values_list('Type', flat=True).distinct()
     
     types = [t for t in types if t and t != 'PERDU']
-    
+
+    is_meditrax = (user.first_name == 'MEDITRAX')
+
     if request.method == 'POST':
         form = AppareilModificationForm(
-            request.POST, 
+            request.POST,
             instance=appareil,
             clients=clients,
             entretiens=accessible_accounts,
-            types=types
+            types=types,
+            is_meditrax=is_meditrax,
         )
         if form.is_valid():
             form.save()
-            return redirect('appareil_list')  
+            return redirect('appareil_list')
     else:
         form = AppareilModificationForm(
             instance=appareil,
             clients=clients,
             entretiens=accessible_accounts,
-            types=types
+            types=types,
+            is_meditrax=is_meditrax,
         )
-    
+
     return render(request, 'accesclient/modify_appareil.html', {'form': form})
 
 
@@ -260,28 +264,32 @@ def create_appareil(request):
         ).values_list('Type', flat=True).distinct()
     
     types = [t for t in types if t and t != 'PERDU']
-    
+
+    is_meditrax = (user.first_name == 'MEDITRAX')
+
     if request.method == 'POST':
         form = AppareilModificationForm(
-            request.POST, 
+            request.POST,
             clients=clients,
             entretiens=accessible_accounts,
-            types=types
+            types=types,
+            is_meditrax=is_meditrax,
         )
         if form.is_valid():
             new_appareil = form.save(commit=False)
             new_appareil.Opérateur = request.user.username
             new_appareil.save()
-            return redirect('appareil_list')  
+            return redirect('appareil_list')
     else:
         # Create form with initial client value
         form = AppareilModificationForm(
             clients=clients,
             entretiens=accessible_accounts,
             types=types,
+            is_meditrax=is_meditrax,
             initial={'Client': user_client} if user_client else {}
         )
-    
+
     return render(request, 'accesclient/modify_appareil.html', {'form': form, 'is_creating': True})
 
 
