@@ -74,7 +74,7 @@
     
     <!-- Field for modifying Autres -->
     <label for="id_autres">Intervenants:</label>
-    <textarea id="id_autres" name="Autres_1">{{ form.Autres_1.value|default_if_none:'' }}</textarea>
+    <textarea id="id_autres" name="Autres_1">{{ appareil.Autres_1|default_if_none:'' }}</textarea>
     
     <button type="submit">Enregistrer</button>
 </form>

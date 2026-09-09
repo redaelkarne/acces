@@ -86,6 +86,15 @@ class AppareilView(LoginRequiredMixin, View):
             'Transmetteur': 'Transmetteur'
         }
 
+        # MEDITRAX gets a customized set of columns: Observations shown (Autres_1
+        # stays out of the table, edited only via the "Intervenants" button),
+        # while Incarceration/Agence/Transmetteur are hidden.
+        is_meditrax = (user.first_name == 'MEDITRAX')
+        if is_meditrax:
+            excluded_columns = [c for c in excluded_columns if c != 'Observations']
+            excluded_columns += ['Incarcération', 'Entretien', 'Transmetteur']
+            custom_column_names['Observations'] = 'Observations'
+
         # Example of dynamically fetching selected columns from request.GET
         selected_columns = [field.name for field in Appareil._meta.fields if request.GET.get(field.name)]
         search_query = request.GET.get('search', '')
@@ -109,7 +118,8 @@ class AppareilView(LoginRequiredMixin, View):
             'custom_column_names': custom_column_names,
             'entretiens': entretiens,
             'selected_entretien': selected_entretien,
-            'search_query': search_query
+            'search_query': search_query,
+            'is_meditrax': is_meditrax,
         })
 
 
@@ -300,16 +310,11 @@ def modify_autres_if_meditrax(request, id):
         return redirect('appareil_list')
 
     if request.method == 'POST':
-        form = AppareilModificationForm(request.POST, instance=appareil)
-        if form.is_valid():
-            # Save only the 'Autres' field
-            appareil.Autres = form.cleaned_data['Autres_1']
-            appareil.save()
-            return redirect('appareil_list')
-    else:
-        form = AppareilModificationForm(instance=appareil)
+        appareil.Autres_1 = request.POST.get('Autres_1', '')
+        appareil.save(update_fields=['Autres_1'])
+        return redirect('appareil_list')
 
-    return render(request, 'accesclient/Meditrax.html', {'form': form, 'appareil': appareil})
+    return render(request, 'accesclient/Meditrax.html', {'appareil': appareil})
 
 
 def sanitize_text(text):

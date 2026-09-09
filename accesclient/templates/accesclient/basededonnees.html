@@ -69,6 +69,10 @@
             background-color: #f8f9fa;
         }
 
+        .meditrax-highlight {
+            background-color: #fff3cd !important;
+        }
+
         /* Responsive design for entretien selector */
         @media (max-width: 768px) {
             .entretien-form {
@@ -174,7 +178,7 @@
             <tr>
                 {% for field_name, verbose_name in custom_column_names.items %}
                     {% if field_name not in excluded_columns %}
-                        <td class="{{ field_name }}{% if field_name == 'Informations' %} Informations{% endif %}">
+                        <td class="{{ field_name }}{% if field_name == 'Informations' %} Informations{% endif %}{% if field_name == 'Observations' and is_meditrax %} meditrax-highlight{% endif %}">
                             {% if field_name == 'Informations' %}
                                 {{ appareil.Informations|default_if_none:"--" }}
                             {% else %}
